@@ -4,356 +4,231 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Vida es Bella | Gastrobar</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --oro: #c5a059;
-            --oro-brillante: #f1d592;
+            --oro: #d4af37;
+            --oro-suave: #e5c07b;
             --cian: #00e5ff;
-            --oscuro-puro: #050505;
-            --oscuro-card: #151515;
-            --gris-texto: #b0b0b0;
-            --success: #4caf50;
+            --negro-fondo: #0a0a0a;
+            --negro-card: #141414;
         }
 
-        body {
-            margin: 0; font-family: 'Poppins', sans-serif;
-            background: var(--oscuro-puro); color: white;
-            overflow-x: hidden; scroll-behavior: smooth;
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--negro-fondo); 
+            color: white; 
         }
 
-        /* FONDO SUTIL */
-        body::before {
-            content: ""; position: fixed; top: 50%; left: 50%;
-            width: 80vw; height: 80vw;
-            background: url('logo.jpg') no-repeat center;
-            background-size: contain; opacity: 0.02;
-            transform: translate(-50%, -50%); z-index: -1;
+        /* DISEÑO DE LAS CAPTURAS */
+        .carrito-resumen {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            z-index: 1000;
         }
 
-        .hero {
-            height: 320px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 20px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, var(--oscuro-puro) 100%);
-            text-align: center;
+        .status-bubble {
+            background: #1a1a1a;
+            padding: 12px 20px;
+            border-radius: 15px;
+            border-left: 4px solid var(--oro);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .logo {
-            width: 130px; height: 130px; border-radius: 50%;
-            object-fit: cover; border: 3px solid var(--oro);
-            box-shadow: 0 0 30px rgba(197, 160, 89, 0.4); margin-bottom: 15px;
-            animation: fadeIn 1s ease-in;
+        .status-bubble b { color: var(--oro-suave); font-size: 1.1rem; }
+
+        .btn-flotante {
+            background-color: var(--oro-suave);
+            color: black;
+            padding: 15px 30px;
+            border-radius: 35px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(229, 192, 123, 0.3);
+            cursor: pointer;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        .hero h1 {
-            font-family: 'Playfair Display', serif; font-size: 2.5rem;
-            margin: 0; color: var(--oro); letter-spacing: 1px;
+        /* MODAL ESTILO CAPTURA */
+        #modalPedido {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
         }
 
-        .sub {
-            color: var(--cian); text-transform: uppercase;
-            letter-spacing: 5px; font-size: 0.8rem; font-weight: 600;
+        .modal-body {
+            background: var(--negro-card);
+            max-width: 450px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 25px;
+            border: 1px solid #333;
         }
 
-        /* NAVEGACIÓN MEJORADA */
-        .nav {
-            position: sticky; top: 0; z-index: 100;
-            display: flex; overflow-x: auto; padding: 15px; gap: 12px;
-            background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(197, 160, 89, 0.1);
+        .modal-body h2 { color: var(--oro-suave); font-family: serif; margin-bottom: 25px; }
+
+        .item-pedido {
+            background: #222;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .nav::-webkit-scrollbar { display: none; }
-
-        .nav button {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 22px; border-radius: 30px;
-            background: rgba(255,255,255,0.05); color: white;
-            font-size: 0.85rem; cursor: pointer; white-space: nowrap;
-            transition: 0.3s;
+        .btn-eliminar {
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
-        .nav button.active {
-            background: var(--oro); color: #000; border-color: var(--oro);
-            font-weight: 600;
+        textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: white;
+            padding: 15px;
+            margin: 20px 0;
+            box-sizing: border-box;
         }
 
-        .container {
-            padding: 20px; display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
+        .total-texto {
+            text-align: right;
+            color: var(--cian);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 25px;
         }
 
-        /* CARD PREMIUM */
-        .card {
-            background: var(--oscuro-card); border-radius: 25px;
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.03);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; flex-direction: column;
-        }
-
-        .card:hover { transform: translateY(-8px); border-color: rgba(197, 160, 89, 0.3); }
-
-        .img-container { width: 100%; height: 200px; overflow: hidden; position: relative; }
-        .card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .card:hover img { transform: scale(1.1); filter: brightness(1.1); }
-
-        .info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .nombre { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; color: #fff; }
-        .precio { color: var(--cian); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; display: block; }
-
-        .btn {
-            background: linear-gradient(45deg, var(--oro), var(--oro-brillante));
-            border: none; padding: 14px; border-radius: 15px;
-            width: 100%; font-weight: bold; color: #1a1a1a;
-            text-transform: uppercase; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
-        }
-
-        .btn:active { transform: scale(0.95); }
-
-        /* CARRITO Y MODALES */
-        #modalCarrito {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-            z-index: 2000; padding: 20px; box-sizing: border-box;
-        }
-
-        .modal-content {
-            background: #111; max-width: 450px; margin: 10px auto;
-            padding: 30px; border-radius: 30px; border: 1px solid rgba(197, 160, 89, 0.3);
-            max-height: 90vh; overflow-y: auto;
-        }
-
-        .carrito-float {
-            position: fixed; bottom: 30px; right: 20px;
-            background: var(--oro); color: #000;
-            padding: 16px 28px; border-radius: 50px;
-            font-weight: 800; box-shadow: 0 10px 30px rgba(197, 160, 89, 0.4);
-            z-index: 1000; display: flex; align-items: center; gap: 12px; cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .carrito-float:hover { transform: scale(1.05); background: var(--oro-brillante); }
-
-        #estadoPedido {
-            position: fixed; bottom: 105px; right: 20px;
-            background: #1a1a1a; padding: 20px; border-radius: 20px;
-            border-left: 5px solid var(--oro); z-index: 999;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 1.8rem; }
-            .container { grid-template-columns: 1fr; }
+        .btn-confirmar {
+            background-color: var(--oro-suave);
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-<audio id="sonidoEstado" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
-<div class="hero">
-    <img src="logo.jpeg.jpeg" class="logo" alt="Logo">
-    <h1>La Vida es Bella</h1>
-    <p class="sub">Gastrobar</p>
+<div style="padding: 20px; text-align: center;">
+    <h1 style="color: var(--oro-suave);">Menú Digital</h1>
+    <div id="lista-productos" style="display: grid; gap: 15px;">
+        </div>
 </div>
 
-<div class="nav" id="cat-nav">
-    <button class="active" onclick="filtrar('todos', this)">Todos</button>
-    <button onclick="filtrar('almuerzos', this)">🍽️ Almuerzos</button>
-    <button onclick="filtrar('mar', this)">🦐 Del Mar</button>
-    <button onclick="filtrar('rapidas', this)">🍔 Rápidas</button>
-    <button onclick="filtrar('bebidas', this)">🍹 Bebidas</button>
-</div>
-
-<div class="container" id="menu-container">
+<div class="carrito-resumen">
+    <div class="status-bubble">
+        <span>✅ <b>¡Listo para mesa!</b></span><br>
+        <small style="color: #888;">⏱️ Calculando tiempo...</small>
     </div>
-
-<div id="modalCarrito">
-    <div class="modal-content">
-        <h2 style="color:var(--oro); font-family:'Playfair Display';">Mi Pedido</h2>
-        <ul id="lista" style="list-style:none; padding:0;"></ul>
-        <textarea id="nota" placeholder="¿Alguna instrucción especial? (Ej: Sin cebolla)" 
-                  style="width:100%; height:80px; background:#222; border:1px solid #444; color:white; border-radius:15px; padding:12px; box-sizing:border-box;"></textarea>
-        <h3 id="total" style="text-align:right; margin: 20px 0; color:var(--cian);">Total: $0</h3>
-        <button onclick="enviarPedido()" class="btn">🚀 Confirmar Pedido</button>
-        <button onclick="cerrarCarrito()" style="background:none; color:#777; border:none; width:100%; margin-top:15px; cursor:pointer;">Seguir explorando</button>
+    <div class="btn-flotante" onclick="mostrarPedido()">
+        <i class="fas fa-shopping-bag"></i>
+        <span id="resumen-total">$0 (0)</span>
     </div>
 </div>
 
-<div id="estadoPedido">
-    <div style="font-weight:600; color:var(--oro);" id="txtEstado">Recibiendo pedido...</div>
-    <div id="tiempoEspera" style="font-size:12px; color:#999; margin-top:4px;">⏱️ Calculando tiempo...</div>
+<div id="modalPedido">
+    <div class="modal-body">
+        <h2>Mi Pedido</h2>
+        <div id="items-contenedor"></div>
+        
+        <textarea id="notas" placeholder="¿Alguna instrucción especial? (Ej: Sin cebolla)"></textarea>
+        
+        <div class="total-texto">Total: <span id="monto-total">$0</span></div>
+        
+        <button class="btn-confirmar" onclick="enviarWhatsApp()">🚀 CONFIRMAR PEDIDO</button>
+        <p onclick="cerrarPedido()" style="text-align:center; margin-top:15px; cursor:pointer; color:#888;">Seguir explorando</p>
+    </div>
 </div>
-
-<div class="carrito-float" id="btn-abrir-carrito">
-    <i class="fas fa-shopping-bag"></i>
-    <span id="cont-carrito">$0 (0)</span>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // 1. CONFIGURACIÓN Y DATOS
-    const firebaseConfig = {
-        apiKey: "AIzaSyCDlGrzItpJAhtlrDyXLbIX46osGOk3k2s",
-        authDomain: "la-vida-es-bella-a2e72.firebaseapp.com",
-        databaseURL: "https://la-vida-es-bella-a2e72-default-rtdb.firebaseio.com",
-        projectId: "la-vida-es-bella-a2e72",
-        storageBucket: "la-vida-es-bella-a2e72.firebasestorage.app",
-        messagingSenderId: "622395641878",
-        appId: "1:622395641878:web:bc3afbeb29d73a59e8a537"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
     const PRODUCTOS = [
-        { cat: 'almuerzos', nombre: 'Almuerzo Ejecutivo', precio: 15000, img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500' },
-        { cat: 'almuerzos', nombre: 'Pollo Asado con Papas', precio: 20000, img: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500' },
-        { cat: 'mar', nombre: 'Camarones al Ajillo', precio: 28000, img: 'https://images.unsplash.com/photo-1625943553852-781c6dd46faa?w=500' },
-        { cat: 'rapidas', nombre: 'Hamburguesa Especial', precio: 18000, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500' },
-        { cat: 'bebidas', nombre: 'Mojito Clásico', precio: 15000, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500' }
-        // Agrega aquí más productos siguiendo este formato
+        { id: 1, nombre: 'Pollo Asado con Papas', precio: 20000 },
+        { id: 2, nombre: 'Hamburguesa Especial', precio: 18000 },
+        { id: 3, nombre: 'Almuerzo Ejecutivo', precio: 15000 }
     ];
 
-    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-    let pedidoID = localStorage.getItem("pedidoID");
-    const mesa = new URLSearchParams(window.location.search).get("mesa") || "Mesa Local";
+    let carrito = [];
 
-    // 2. FUNCIONES DE RENDER
-    function cargarMenu() {
-        const contenedor = document.getElementById('menu-container');
-        contenedor.innerHTML = PRODUCTOS.map(p => `
-            <div class="card ${p.cat}">
-                <div class="img-container">
-                    <img src="${p.img}" alt="${p.nombre}" loading="lazy">
+    function renderProductos() {
+        const cont = document.getElementById('lista-productos');
+        cont.innerHTML = PRODUCTOS.map(p => `
+            <div style="background:#141414; padding:20px; border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <b>${p.nombre}</b><br>
+                    <span style="color:var(--cian)">$${p.precio.toLocaleString()}</span>
                 </div>
-                <div class="info">
-                    <div>
-                        <div class="nombre">${p.nombre}</div>
-                        <span class="precio">$${p.precio.toLocaleString()}</span>
-                    </div>
-                    <button class="btn" onclick="agregar('${p.nombre}', ${p.precio}, this)">Agregar</button>
-                </div>
+                <button onclick="agregar(${p.id})" style="background:var(--oro-suave); border:none; padding:8px 15px; border-radius:8px; font-weight:bold;">+</button>
             </div>
         `).join('');
     }
 
-    function agregar(nombre, precio, btn) {
-        carrito.push({ nombre, precio });
-        localStorage.setItem("carrito", JSON.stringify(carrito));
+    function agregar(id) {
+        const p = PRODUCTOS.find(x => x.id === id);
+        carrito.push(p);
         actualizarUI();
-        
-        btn.innerHTML = "✔ ¡Listo!";
-        btn.style.background = "var(--success)";
-        setTimeout(() => { 
-            btn.innerHTML = "Agregar"; 
-            btn.style.background = ""; 
-        }, 1000);
-    }
-
-    function actualizarUI() {
-        const total = carrito.reduce((a, b) => a + b.precio, 0);
-        document.getElementById('cont-carrito').innerText = `$${total.toLocaleString()} (${carrito.length})`;
-    }
-
-    function renderCarrito() {
-        const lista = document.getElementById('lista');
-        const totalElt = document.getElementById('total');
-        let total = 0;
-        
-        lista.innerHTML = carrito.map((item, i) => {
-            total += item.precio;
-            return `
-                <li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px;">
-                    <span>${item.nombre}</span>
-                    <div>
-                        <b style="margin-right:10px;">$${item.precio.toLocaleString()}</b>
-                        <button onclick="eliminar(${i})" style="background:#ff4444; border:none; color:white; border-radius:50%; width:25px; height:25px; cursor:pointer;">×</button>
-                    </div>
-                </li>`;
-        }).join('');
-        
-        if(carrito.length === 0) lista.innerHTML = "<p style='text-align:center; color:#666;'>El carrito está vacío</p>";
-        totalElt.innerText = `Total: $${total.toLocaleString()}`;
     }
 
     function eliminar(index) {
         carrito.splice(index, 1);
-        localStorage.setItem("carrito", JSON.stringify(carrito));
-        renderCarrito();
         actualizarUI();
+        if(carrito.length > 0) mostrarPedido();
+        else cerrarPedido();
     }
 
-    // 3. LOGICA DE PEDIDO
-    function enviarPedido() {
-        if(pedidoID) return alert("Ya tienes un pedido preparándose 👨‍🍳");
-        if(carrito.length === 0) return alert("Agrega algo rico al carrito primero");
+    function actualizarUI() {
+        const total = carrito.reduce((sum, p) => sum + p.precio, 0);
+        document.getElementById('resumen-total').innerText = `$${total.toLocaleString()} (${carrito.length})`;
+        document.getElementById('monto-total').innerText = `$${total.toLocaleString()}`;
+    }
 
-        const total = carrito.reduce((a, b) => a + b.precio, 0);
-        const pedido = {
-            mesa,
-            items: carrito,
-            total,
-            nota: document.getElementById("nota").value,
-            estado: "pendiente",
-            timestamp: Date.now()
-        };
+    function mostrarPedido() {
+        const cont = document.getElementById('items-contenedor');
+        cont.innerHTML = carrito.map((p, index) => `
+            <div class="item-pedido">
+                <span>${p.nombre}</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <b>$${p.precio.toLocaleString()}</b>
+                    <button class="btn-eliminar" onclick="eliminar(${index})">×</button>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('modalPedido').style.display = 'block';
+    }
 
-        const ref = db.ref("pedidos").push(pedido);
-        pedidoID = ref.key;
-        localStorage.setItem("pedidoID", pedidoID);
+    function cerrarPedido() { document.getElementById('modalPedido').style.display = 'none'; }
+
+    function enviarWhatsApp() {
+        const total = carrito.reduce((sum, p) => sum + p.precio, 0);
+        const notas = document.getElementById('notas').value;
+        const items = carrito.map(p => `- ${p.nombre}`).join('\n');
         
-        // Notificación WhatsApp
-        const msg = `*NUEVO PEDIDO - ${mesa}*\n----------\n${carrito.map(i => `- ${i.nombre}`).join('\n')}\n----------\n*Total: $${total.toLocaleString()}*`;
+        const msg = `*NUEVO PEDIDO*\n${items}\n\n*Notas:* ${notas}\n*TOTAL:* $${total.toLocaleString()}`;
         window.open(`https://wa.me/573207999205?text=${encodeURIComponent(msg)}`);
-
-        carrito = [];
-        localStorage.removeItem("carrito");
-        actualizarUI();
-        cerrarCarrito();
-        escucharEstado();
     }
 
-    function escucharEstado() {
-        if(!pedidoID) return;
-        document.getElementById("estadoPedido").style.display = "block";
-        
-        db.ref("pedidos/" + pedidoID).on("value", snap => {
-            const data = snap.val();
-            if(!data) return;
-
-            const textos = { pendiente: "🧾 Recibido", preparando: "👨‍🍳 En cocina", listo: "✅ ¡Listo para mesa!", entregado: "📦 Disfruta tu comida" };
-            document.getElementById("txtEstado").innerText = textos[data.estado] || "Procesando...";
-            
-            if(data.estado === "entregado") {
-                setTimeout(() => { 
-                    localStorage.removeItem("pedidoID"); 
-                    location.reload(); 
-                }, 5000);
-            }
-        });
-    }
-
-    function filtrar(cat, btn) {
-        document.querySelectorAll('#cat-nav button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.card').forEach(c => {
-            c.style.display = (cat === 'todos' || c.classList.contains(cat)) ? 'flex' : 'none';
-        });
-    }
-
-    function cerrarCarrito() { document.getElementById('modalCarrito').style.display = 'none'; }
-    document.getElementById('btn-abrir-carrito').onclick = () => { renderCarrito(); document.getElementById('modalCarrito').style.display = 'block'; };
-
-    window.onload = () => { cargarMenu(); actualizarUI(); escucharEstado(); };
+    renderProductos();
 </script>
+
 </body>
 </html>
