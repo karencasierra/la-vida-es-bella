@@ -60,12 +60,16 @@
         .precio { color: var(--cian); font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
         .btn-add { width: 100%; background: transparent; border: 1.5px solid var(--oro-mate); color: var(--oro-mate); padding: 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        /* Carrito y Modal */
+        /* Carrito y Modales */
         .cart-btn { position: fixed; bottom: 25px; right: 20px; background: var(--oro); color: black; padding: 15px 20px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 10px; z-index: 1000; box-shadow: 0 8px 20px rgba(0,0,0,0.6); cursor: pointer; }
-        #modalCarrito { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; }
-        .modal-content { background: #111; margin: 10% auto; padding: 20px; width: 85%; max-width: 380px; border-radius: 15px; border: 1px solid var(--oro); text-align: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; }
+        .modal-content { background: #111; margin: 10% auto; padding: 25px; width: 85%; max-width: 380px; border-radius: 15px; border: 1px solid var(--oro); text-align: center; }
         .item-pedido { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin: 10px 0; border-bottom: 1px solid #222; padding-bottom: 8px; color: white; }
         .btn-del { color: #ff4444; background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 10px; }
+
+        /* Alerta de Estado Emergente */
+        #avisoEstado { display: none; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--oro); color: black; padding: 15px 25px; border-radius: 12px; font-weight: bold; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); z-index: 3000; text-align: center; animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 100px; opacity: 1; } }
 
         /* Footer */
         footer { text-align: center; padding: 40px 20px 120px; border-top: 1px solid #222; background: #050505; }
@@ -103,6 +107,10 @@
 
 <div class="container" id="menu-items"></div>
 
+<div id="avisoEstado">
+    <i class="fas fa-sync fa-spin"></i> <span id="textoEstado">PEDIDO PENDIENTE...</span>
+</div>
+
 <footer>
     <h4>Contáctanos y Síguenos</h4>
     <div class="social-icons">
@@ -117,21 +125,21 @@
     <span id="resumen-total">$0 (0)</span>
 </div>
 
-<div id="modalCarrito">
+<div id="modalCarrito" class="modal">
     <div class="modal-content">
         <h3 style="color:var(--oro)">TU PEDIDO</h3>
         <input type="number" id="mesa" placeholder="N° Mesa" style="width:80%; padding:10px; margin-bottom:15px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center;">
         <div id="lista-pedido" style="margin-bottom:15px; max-height:250px; overflow-y:auto; padding: 0 5px;"></div>
         <div id="total-pedido" style="font-weight:bold; color:var(--cian); margin-bottom:15px; border-top: 1px solid #333; padding-top: 10px;">Total: $0</div>
-        <button onclick="enviarWhatsApp()" style="width:100%; padding:14px; background:var(--oro); border:none; border-radius:8px; font-weight:bold; cursor:pointer; text-transform: uppercase;">ENVIAR A WHATSAPP</button>
-        <p onclick="document.getElementById('modalCarrito').style.display='none'" style="margin-top:20px; font-size:0.8rem; color:#888; cursor:pointer; text-decoration: underline;">SEGUIR COMPRANDO</p>
+        <button onclick="enviarWhatsApp()" style="width:100%; padding:14px; background:var(--oro); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">ENVIAR A WHATSAPP</button>
+        <p onclick="document.getElementById('modalCarrito').style.display='none'" style="margin-top:20px; font-size:0.8rem; color:#888; cursor:pointer;">SEGUIR COMPRANDO</p>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     const PRODUCTOS = [
-        // LO QUE YA TENÍAS (ALMUERZOS Y RÁPIDAS)
+        // ALMUERZOS Y RÁPIDAS
         { cat: 'almuerzo', nombre: 'Almuerzo Ejecutivo', precio: 15000, img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500' },
         { cat: 'almuerzo', nombre: 'Punta de Anca Grill', precio: 32000, img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500' },
         { cat: 'almuerzo', nombre: 'Pechuga a la Plancha', precio: 22000, img: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500' },
@@ -141,7 +149,7 @@
         { cat: 'rapida', nombre: 'Salchipapa con Queso', precio: 20000 },
         { cat: 'rapida', nombre: 'Club House Sandwich', precio: 16000 },
 
-        // CARNES (DEL PDF) [cite: 4]
+        // CARNES (PDF)
         { cat: 'carnes', nombre: 'Ceviche de Chicharrón', precio: 33000 },
         { cat: 'carnes', nombre: 'Picada de Carne Personal', precio: 44000 },
         { cat: 'carnes', nombre: 'Picada de Carne (2 Personas)', precio: 78000 },
@@ -153,45 +161,24 @@
         { cat: 'carnes', nombre: 'Chuleta de Pollo', precio: 39000 },
         { cat: 'carnes', nombre: 'Chuleta de Cerdo', precio: 41000 },
 
-        // MARISCOS (DEL PDF) [cite: 7]
+        // MARISCOS (PDF)
         { cat: 'mariscos', nombre: 'Picada Marinera Personal', precio: 62000 },
         { cat: 'mariscos', nombre: 'Picada Marinera (2) Personas', precio: 96000 },
         { cat: 'mariscos', nombre: 'Picada Mixta Personal', precio: 62000 },
         { cat: 'mariscos', nombre: 'Picada Mixta (2) Personas', precio: 96000 },
         { cat: 'mariscos', nombre: 'Pastas Marineras', precio: 61000 },
         { cat: 'mariscos', nombre: 'Pastas de Camarón', precio: 53000 },
-        { cat: 'mariscos', nombre: 'Langostinos Apanados', precio: 66000 },
-        { cat: 'mariscos', nombre: 'Camarones Apanados', precio: 50000 },
         { cat: 'mariscos', nombre: 'Ceviche de Camarón', precio: 44000 },
-        { cat: 'mariscos', nombre: 'Cazuela de Camarón', precio: 57000 },
-        { cat: 'mariscos', nombre: 'Ceviche de Concha', precio: 47000 },
-        { cat: 'mariscos', nombre: 'Ceviche Mixto', precio: 41000 },
-        { cat: 'mariscos', nombre: 'Corvina Apanada', precio: 51000 },
-        { cat: 'mariscos', nombre: 'Corvina al Ajillo', precio: 62000 },
         { cat: 'mariscos', nombre: 'Cazuela Marinera', precio: 62000 },
         { cat: 'mariscos', nombre: 'Pargo Frito (450-550 Gr)', precio: 57000 },
         { cat: 'mariscos', nombre: 'Arroz Marinero', precio: 55000 },
-        { cat: 'mariscos', nombre: 'Arroz de Camarón', precio: 50000 },
 
-        // BEBIDAS (DEL PDF) [cite: 12, 13, 15, 17, 19, 21]
-        { cat: 'bebidas', nombre: 'Michelada Cerveza/Soda', precio: 14000 },
-        { cat: 'bebidas', nombre: 'Limonada Natural', precio: 12000 },
+        // BEBIDAS Y COCTELES (PDF)
+        { cat: 'bebidas', nombre: 'Michelada Cerveza', precio: 14000 },
         { cat: 'bebidas', nombre: 'Limonada Cerezada', precio: 17000 },
         { cat: 'bebidas', nombre: 'Soda Frutos Rojos', precio: 18000 },
-        { cat: 'bebidas', nombre: 'Granizado en Agua', precio: 14000 },
-        { cat: 'bebidas', nombre: 'Granizado en Leche', precio: 17000 },
-        { cat: 'bebidas', nombre: 'Cerveza Nacional', precio: 5000 },
-        { cat: 'bebidas', nombre: 'Jugo Hit', precio: 5000 },
-        { cat: 'bebidas', nombre: 'Agua', precio: 3000 },
-
-        // COCTELES (DEL PDF) [cite: 28-40]
-        { cat: 'cocteles', nombre: 'Coctel La Vida es Bella', precio: 31000 },
         { cat: 'cocteles', nombre: 'Margarita', precio: 29000 },
-        { cat: 'cocteles', nombre: 'Laguna Azul', precio: 31000 },
         { cat: 'cocteles', nombre: 'Piña Colada', precio: 31000 },
-        { cat: 'cocteles', nombre: 'Orgasmo', precio: 35000 },
-        { cat: 'cocteles', nombre: 'Caipirinha', precio: 29000 },
-        { cat: 'cocteles', nombre: 'Cuba Libre', precio: 23000 },
         { cat: 'cocteles', nombre: 'Sexo en la Playa', precio: 31000 }
     ];
 
@@ -200,10 +187,7 @@
     function cargarRiel() {
         const almuerzos = PRODUCTOS.filter(p => p.cat === 'almuerzo');
         document.getElementById('riel-fotos').innerHTML = almuerzos.map(p => `
-            <div class="swiper-slide">
-                <img src="${p.img}">
-                <div class="slide-caption">${p.nombre}</div>
-            </div>
+            <div class="swiper-slide"><img src="${p.img}"><div class="slide-caption">${p.nombre}</div></div>
         `).join('');
         new Swiper(".mySwiper", { loop: true, autoplay: { delay: 3000 } });
     }
@@ -222,22 +206,18 @@
 
     function agregar(nombre, precio) {
         const item = carrito.find(i => i.nombre === nombre);
-        if (item) { item.cantidad++; } 
-        else { carrito.push({ nombre, precio, cantidad: 1 }); }
+        if (item) { item.cantidad++; } else { carrito.push({ nombre, precio, cantidad: 1 }); }
         actualizarResumen();
     }
 
     function eliminar(nombre) {
         const index = carrito.findIndex(i => i.nombre === nombre);
         if (index !== -1) {
-            if (carrito[index].cantidad > 1) {
-                carrito[index].cantidad--;
-            } else {
-                carrito.splice(index, 1);
-            }
+            if (carrito[index].cantidad > 1) { carrito[index].cantidad--; } 
+            else { carrito.splice(index, 1); }
         }
         actualizarResumen();
-        verPedido(); // Refresca el modal para mostrar el cambio
+        verPedido();
     }
 
     function actualizarResumen() {
@@ -268,11 +248,25 @@
     function enviarWhatsApp() {
         const mesa = document.getElementById('mesa').value;
         if (!mesa) return alert("Por favor, ingresa el número de mesa");
+        
         let txt = `*NUEVO PEDIDO - MESA ${mesa}*\n\n`;
-        carrito.forEach(i => txt += `✅ ${i.cantidad}x ${i.nombre} - $${(i.precio * i.cantidad).toLocaleString()}\n`);
-        const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
-        txt += `\n*TOTAL A PAGAR: $${total.toLocaleString()}*`;
+        carrito.forEach(i => txt += `✅ ${i.cantidad}x ${i.nombre}\n`);
+        
+        // Simular Estado Emergente
+        document.getElementById('modalCarrito').style.display = 'none';
+        const aviso = document.getElementById('avisoEstado');
+        const texto = document.getElementById('textoEstado');
+        
+        aviso.style.display = 'block';
+        
+        // Abrir WhatsApp
         window.open(`https://wa.me/57324881652?text=${encodeURIComponent(txt)}`);
+
+        // Cambiar estado después de 5 segundos
+        setTimeout(() => {
+            texto.innerText = "¡RECIBIDO! EN PREPARACIÓN 🍳";
+            aviso.style.background = "#00FBFF"; // Color cian para preparación
+        }, 5000);
     }
 
     function filtrar(cat, btn) {
