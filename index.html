@@ -31,13 +31,11 @@
         header h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--oro); margin: 5px 0; text-transform: uppercase; letter-spacing: 2px; }
         .direccion { font-size: 0.65rem; color: #888; text-transform: uppercase; }
 
-        /* --- RIEL DE ALMUERZOS --- */
         .swiper { width: 95%; max-width: 800px; height: 220px; margin: 15px auto; border-radius: 20px; border: 1px solid #222; }
         .swiper-slide { position: relative; }
         .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
         .slide-caption { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: var(--oro); padding: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; text-transform: uppercase; }
 
-        /* --- BANNER DOMICILIO --- */
         .banner-domi {
             display: flex; align-items: center; justify-content: center; gap: 12px;
             background: #1a1a1a; margin: 10px 15px; padding: 12px; border-radius: 12px; border: 1px solid #333;
@@ -45,12 +43,10 @@
         .banner-domi i { color: var(--oro); font-size: 1.4rem; }
         .banner-domi p { margin: 0; font-size: 0.7rem; font-weight: 600; color: var(--oro-mate); text-transform: uppercase; }
 
-        /* --- CATEGORÍAS --- */
         .categorias { display: flex; gap: 10px; padding: 15px; overflow-x: auto; justify-content: center; position: sticky; top: 0; background: rgba(0,0,0,0.95); z-index: 100; scrollbar-width: none; }
         .btn-cat { background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.65rem; cursor: pointer; text-transform: uppercase; }
         .btn-cat.active { background: var(--oro); color: black; font-weight: bold; }
 
-        /* --- GRID VERTICAL --- */
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
         @media (min-width: 768px) { .container { grid-template-columns: repeat(4, 1fr); } }
 
@@ -61,17 +57,15 @@
         .precio { color: var(--cian); font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
         .btn-add { width: 100%; background: transparent; border: 1.5px solid var(--oro-mate); color: var(--oro-mate); padding: 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        /* --- FOOTER (CONTACTOS) --- */
         footer { text-align: center; padding: 40px 20px 120px; border-top: 1px solid #222; background: #050505; }
         footer h4 { color: var(--oro); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         .social-icons { display: flex; justify-content: center; gap: 30px; }
         .social-icons a { color: var(--oro-mate); font-size: 1.8rem; text-decoration: none; }
 
-        /* --- CARRITO Y MODAL --- */
         .cart-btn { position: fixed; bottom: 25px; right: 20px; background: var(--oro); color: black; padding: 15px 20px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 10px; z-index: 1000; box-shadow: 0 8px 20px rgba(0,0,0,0.6); cursor: pointer; }
         #modalCarrito { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; }
-        .modal-content { background: #111; margin: 20% auto; padding: 20px; width: 80%; max-width: 350px; border-radius: 15px; border: 1px solid var(--oro); text-align: center; }
-        .item-pedido { display: flex; justify-content: space-between; font-size: 0.8rem; margin: 5px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .modal-content { background: #111; margin: 15% auto; padding: 20px; width: 85%; max-width: 350px; border-radius: 15px; border: 1px solid var(--oro); text-align: center; }
+        .item-pedido { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin: 10px 0; border-bottom: 1px solid #333; padding-bottom: 8px; color: white; }
     </style>
 </head>
 <body>
@@ -118,11 +112,11 @@
 <div id="modalCarrito">
     <div class="modal-content">
         <h3 style="color:var(--oro)">TU PEDIDO</h3>
-        <input type="number" id="mesa" placeholder="N° Mesa" style="width:80%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center;">
-        <div id="lista-pedido" style="margin-bottom:15px; max-height:150px; overflow-y:auto;"></div>
-        <div id="total-pedido" style="font-weight:bold; color:var(--cian); margin-bottom:15px;">Total: $0</div>
-        <button onclick="enviarWhatsApp()" style="width:100%; padding:12px; background:var(--oro); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">ENVIAR PEDIDO</button>
-        <p onclick="document.getElementById('modalCarrito').style.display='none'" style="margin-top:15px; font-size:0.8rem; color:#888; cursor:pointer;">REGRESAR</p>
+        <input type="number" id="mesa" placeholder="N° Mesa" style="width:80%; padding:10px; margin-bottom:15px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center; font-size: 1rem;">
+        <div id="lista-pedido" style="margin-bottom:20px; max-height:250px; overflow-y:auto; padding: 0 5px;"></div>
+        <div id="total-pedido" style="font-weight:bold; color:var(--cian); margin-bottom:20px; font-size: 1.2rem; border-top: 1px solid var(--oro); padding-top: 10px;">Total: $0</div>
+        <button onclick="enviarWhatsApp()" style="width:100%; padding:14px; background:var(--oro); border:none; border-radius:8px; font-weight:bold; cursor:pointer; text-transform: uppercase; font-size: 0.9rem;">ENVIAR PEDIDO</button>
+        <p onclick="document.getElementById('modalCarrito').style.display='none'" style="margin-top:20px; font-size:0.85rem; color:#888; cursor:pointer; text-decoration: underline;">CERRAR Y SEGUIR COMPRANDO</p>
     </div>
 </div>
 
@@ -171,25 +165,67 @@
         `).join('');
     }
 
-    function agregar(n, p) {
-        carrito.push({ nombre: n, precio: p });
-        const total = carrito.reduce((s, i) => s + i.precio, 0);
-        document.getElementById('resumen-total').innerText = `$${total.toLocaleString()} (${carrito.length})`;
+    // --- FUNCIÓN AGREGAR (SIN DUPLICADOS) ---
+    function agregar(nombre, precio) {
+        // Buscamos el plato exacto por nombre
+        const index = carrito.findIndex(item => item.nombre === nombre);
+
+        if (index !== -1) {
+            // SI YA EXISTE: Sumamos 1 a la cantidad
+            carrito[index].cantidad++;
+        } else {
+            // SI NO EXISTE: Lo agregamos como nuevo
+            carrito.push({ nombre: nombre, precio: precio, cantidad: 1 });
+        }
+        
+        actualizarResumen();
+    }
+
+    function actualizarResumen() {
+        const totalDinero = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+        const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+        document.getElementById('resumen-total').innerText = `$${totalDinero.toLocaleString()} (${totalItems})`;
     }
 
     function verPedido() {
-        if (carrito.length === 0) return alert("El carrito está vacío");
+        if (carrito.length === 0) return alert("Tu pedido está vacío");
+        
         document.getElementById('modalCarrito').style.display = 'block';
-        document.getElementById('lista-pedido').innerHTML = carrito.map(i => `<div class="item-pedido"><span>${i.nombre}</span><span>$${i.precio.toLocaleString()}</span></div>`).join('');
-        const total = carrito.reduce((s, i) => s + i.precio, 0);
-        document.getElementById('total-pedido').innerText = `Total: $${total.toLocaleString()}`;
+        const listaPedido = document.getElementById('lista-pedido');
+        listaPedido.innerHTML = "";
+
+        // Generar la lista visual sumando las cantidades
+        carrito.forEach(item => {
+            const subtotal = item.precio * item.cantidad;
+            listaPedido.innerHTML += `
+                <div class="item-pedido">
+                    <span><strong>${item.cantidad}x</strong> ${item.nombre}</span>
+                    <span>$${subtotal.toLocaleString()}</span>
+                </div>
+            `;
+        });
+
+        const totalFinal = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+        document.getElementById('total-pedido').innerText = `Total: $${totalFinal.toLocaleString()}`;
     }
 
     function enviarWhatsApp() {
         const mesa = document.getElementById('mesa').value;
-        if (!mesa) return alert("Ingresa el número de mesa");
-        let txt = `*NUEVO PEDIDO - MESA ${mesa}*\n\n` + carrito.map(i => `• ${i.nombre}`).join('\n');
-        window.open(`https://wa.me/57324881652?text=${encodeURIComponent(txt)}`);
+        if (!mesa) return alert("Por favor, ingresa el número de mesa.");
+
+        let texto = `*NUEVO PEDIDO - LA VIDA ES BELLA*\n`;
+        texto += `*MESA:* ${mesa}\n`;
+        texto += `----------------------------\n`;
+
+        carrito.forEach(item => {
+            texto += `✅ ${item.cantidad}x ${item.nombre} - $${(item.precio * item.cantidad).toLocaleString()}\n`;
+        });
+
+        const totalFinal = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+        texto += `----------------------------\n`;
+        texto += `*TOTAL FINAL: $${totalFinal.toLocaleString()}*`;
+
+        window.open(`https://wa.me/57324881652?text=${encodeURIComponent(texto)}`);
     }
 
     function filtrar(cat, btn) {
