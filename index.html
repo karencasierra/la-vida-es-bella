@@ -50,7 +50,7 @@
         .btn-cat { background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.65rem; cursor: pointer; text-transform: uppercase; }
         .btn-cat.active { background: var(--oro); color: black; font-weight: bold; }
 
-        /* --- GRID DE PLATOS --- */
+        /* --- GRID VERTICAL --- */
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
         @media (min-width: 768px) { .container { grid-template-columns: repeat(4, 1fr); } }
 
@@ -61,14 +61,17 @@
         .precio { color: var(--cian); font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
         .btn-add { width: 100%; background: transparent; border: 1.5px solid var(--oro-mate); color: var(--oro-mate); padding: 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        /* --- FOOTER DE CONTACTO --- */
+        /* --- FOOTER (CONTACTOS) --- */
         footer { text-align: center; padding: 40px 20px 120px; border-top: 1px solid #222; background: #050505; }
         footer h4 { color: var(--oro); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         .social-icons { display: flex; justify-content: center; gap: 30px; }
-        .social-icons a { color: var(--oro-mate); font-size: 1.8rem; transition: 0.3s; }
+        .social-icons a { color: var(--oro-mate); font-size: 1.8rem; text-decoration: none; }
 
-        /* --- CARRITO --- */
-        .cart-btn { position: fixed; bottom: 25px; right: 20px; background: var(--oro); color: black; padding: 15px 20px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 10px; z-index: 1000; }
+        /* --- CARRITO Y MODAL --- */
+        .cart-btn { position: fixed; bottom: 25px; right: 20px; background: var(--oro); color: black; padding: 15px 20px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 10px; z-index: 1000; box-shadow: 0 8px 20px rgba(0,0,0,0.6); cursor: pointer; }
+        #modalCarrito { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; }
+        .modal-content { background: #111; margin: 20% auto; padding: 20px; width: 80%; max-width: 350px; border-radius: 15px; border: 1px solid var(--oro); text-align: center; }
+        .item-pedido { display: flex; justify-content: space-between; font-size: 0.8rem; margin: 5px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -85,7 +88,7 @@
 
 <div class="banner-domi">
     <i class="fas fa-motorcycle"></i>
-    <p>¡Servicio a domicilio disponible! Pide al WhatsApp</p>
+    <p>¡Contamos con Domicilio! Escríbenos</p>
 </div>
 
 <div class="categorias">
@@ -107,9 +110,20 @@
     </div>
 </footer>
 
-<div class="cart-btn" onclick="abrirCarrito()">
+<div class="cart-btn" onclick="verPedido()">
     <i class="fas fa-shopping-cart"></i>
     <span id="resumen-total">$0 (0)</span>
+</div>
+
+<div id="modalCarrito">
+    <div class="modal-content">
+        <h3 style="color:var(--oro)">TU PEDIDO</h3>
+        <input type="number" id="mesa" placeholder="N° Mesa" style="width:80%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; text-align:center;">
+        <div id="lista-pedido" style="margin-bottom:15px; max-height:150px; overflow-y:auto;"></div>
+        <div id="total-pedido" style="font-weight:bold; color:var(--cian); margin-bottom:15px;">Total: $0</div>
+        <button onclick="enviarWhatsApp()" style="width:100%; padding:12px; background:var(--oro); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">ENVIAR PEDIDO</button>
+        <p onclick="document.getElementById('modalCarrito').style.display='none'" style="margin-top:15px; font-size:0.8rem; color:#888; cursor:pointer;">REGRESAR</p>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -130,6 +144,8 @@
         { cat: 'bebida', nombre: 'Mojito Maracuyá', precio: 12000, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500' },
         { cat: 'bebida', nombre: 'Limonada de Coco', precio: 9000, img: 'https://cdn.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=375,fit=scale-down/cdn-ecommerce/store_01JJADVM5E8SXR9HKC2HMH4718%2Fassets%2F1738691234765-limonadadecoco2.jpg' }
     ];
+
+    let carrito = [];
 
     function cargarRiel() {
         const almuerzos = PRODUCTOS.filter(p => p.cat === 'almuerzo');
@@ -155,10 +171,25 @@
         `).join('');
     }
 
-    let carrito = [];
     function agregar(n, p) {
         carrito.push({ nombre: n, precio: p });
-        document.getElementById('resumen-total').innerText = `$${carrito.reduce((s,i)=>s+i.precio,0).toLocaleString()} (${carrito.length})`;
+        const total = carrito.reduce((s, i) => s + i.precio, 0);
+        document.getElementById('resumen-total').innerText = `$${total.toLocaleString()} (${carrito.length})`;
+    }
+
+    function verPedido() {
+        if (carrito.length === 0) return alert("El carrito está vacío");
+        document.getElementById('modalCarrito').style.display = 'block';
+        document.getElementById('lista-pedido').innerHTML = carrito.map(i => `<div class="item-pedido"><span>${i.nombre}</span><span>$${i.precio.toLocaleString()}</span></div>`).join('');
+        const total = carrito.reduce((s, i) => s + i.precio, 0);
+        document.getElementById('total-pedido').innerText = `Total: $${total.toLocaleString()}`;
+    }
+
+    function enviarWhatsApp() {
+        const mesa = document.getElementById('mesa').value;
+        if (!mesa) return alert("Ingresa el número de mesa");
+        let txt = `*NUEVO PEDIDO - MESA ${mesa}*\n\n` + carrito.map(i => `• ${i.nombre}`).join('\n');
+        window.open(`https://wa.me/57324881652?text=${encodeURIComponent(txt)}`);
     }
 
     function filtrar(cat, btn) {
