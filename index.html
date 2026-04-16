@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LA VIDA ES BELLA | GASTROBAR</title>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --oro: #FFD700; 
             --oro-mate: #D4AF37;
             --cian: #00FBFF;
-            --fondo: #080808;
-            --card: #1A1A1A;
-            --glass: rgba(255, 255, 255, 0.05);
+            --fondo: #000000;
+            --gris-card: #121212;
         }
 
         body {
@@ -23,333 +23,152 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--fondo);
             color: white;
-            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* --- HEADER --- */
-        header {
-            padding: 60px 20px;
-            text-align: center;
-        }
+        header { padding: 30px 20px 10px; text-align: center; }
+        .logo-principal { width: 75px; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4)); }
+        header h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--oro); margin: 5px 0; text-transform: uppercase; letter-spacing: 2px; }
+        .direccion { font-size: 0.65rem; color: #888; text-transform: uppercase; }
 
-        .logo-img {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            border: 3px solid var(--oro-mate);
-            object-fit: cover;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
-            margin-bottom: 20px;
-        }
+        /* --- RIEL DE ALMUERZOS --- */
+        .swiper { width: 95%; max-width: 800px; height: 220px; margin: 15px auto; border-radius: 20px; border: 1px solid #222; }
+        .swiper-slide { position: relative; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: var(--oro); padding: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; text-transform: uppercase; }
 
-        header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.2rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: linear-gradient(to bottom, #FFF 20%, var(--oro) 50%, var(--oro-mate) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-            text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.8);
-            font-weight: 900;
+        /* --- BANNER DOMICILIO --- */
+        .banner-domi {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            background: #1a1a1a; margin: 10px 15px; padding: 12px; border-radius: 12px; border: 1px solid #333;
         }
-
-        .tagline {
-            color: var(--oro-mate);
-            letter-spacing: 10px;
-            text-transform: uppercase;
-            font-size: 1rem;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-
-        .direccion {
-            font-size: 0.85rem;
-            color: #888;
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
-
-        /* --- DOMICILIOS INFO --- */
-        .domicilios-banner {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px dashed var(--oro);
-            margin: 20px;
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-        }
+        .banner-domi i { color: var(--oro); font-size: 1.4rem; }
+        .banner-domi p { margin: 0; font-size: 0.7rem; font-weight: 600; color: var(--oro-mate); text-transform: uppercase; }
 
         /* --- CATEGORÍAS --- */
-        .categorias {
-            display: flex;
-            gap: 12px;
-            padding: 15px;
-            position: sticky;
-            top: 0;
-            background: rgba(8, 8, 8, 0.95);
-            backdrop-filter: blur(15px);
-            z-index: 100;
-            overflow-x: auto;
-            justify-content: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .categorias { display: flex; gap: 10px; padding: 15px; overflow-x: auto; justify-content: center; position: sticky; top: 0; background: rgba(0,0,0,0.95); z-index: 100; scrollbar-width: none; }
+        .btn-cat { background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.65rem; cursor: pointer; text-transform: uppercase; }
+        .btn-cat.active { background: var(--oro); color: black; font-weight: bold; }
 
-        .btn-cat {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #DDD;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-            white-space: nowrap;
-            text-transform: uppercase;
-        }
+        /* --- GRID DE PLATOS --- */
+        .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; max-width: 1200px; margin: auto; }
+        @media (min-width: 768px) { .container { grid-template-columns: repeat(4, 1fr); } }
 
-        .btn-cat.active {
-            background: var(--oro);
-            color: black;
-            font-weight: 700;
-        }
+        .card { background: var(--gris-card); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; height: 100%; border: 1px solid #222; }
+        .card img { width: 100%; height: 140px; object-fit: cover; }
+        .info { padding: 12px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .info h3 { font-size: 0.8rem; margin: 0 0 8px; height: 38px; overflow: hidden; color: #fff; text-transform: uppercase; }
+        .precio { color: var(--cian); font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
+        .btn-add { width: 100%; background: transparent; border: 1.5px solid var(--oro-mate); color: var(--oro-mate); padding: 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        /* --- GRID --- */
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 25px;
-            max-width: 1200px;
-            margin: auto;
-            padding-bottom: 50px;
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 25px;
-            overflow: hidden;
-            border: 1px solid #222;
-        }
-
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .info { padding: 20px; text-align: center; }
-
-        .precio {
-            display: block;
-            color: var(--cian);
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-
-        .btn-agregar {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 2px solid var(--oro-mate);
-            color: var(--oro-mate);
-            border-radius: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        /* --- CONTACTOS --- */
-        .social-contacts {
-            margin: 40px auto;
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid rgba(212, 175, 55, 0.2);
-            max-width: 600px;
-            padding-bottom: 120px;
-        }
-        .social-contacts h3 {
-            color: var(--oro);
-            font-family: 'Playfair Display', serif;
-            text-transform: uppercase;
-            margin-bottom: 25px;
-        }
-        .social-icons-wrapper {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .social-icon {
-            color: var(--oro-mate);
-            font-size: 2.2rem;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-        .social-icon:hover { transform: scale(1.2); color: var(--oro); }
+        /* --- FOOTER DE CONTACTO --- */
+        footer { text-align: center; padding: 40px 20px 120px; border-top: 1px solid #222; background: #050505; }
+        footer h4 { color: var(--oro); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .social-icons { display: flex; justify-content: center; gap: 30px; }
+        .social-icons a { color: var(--oro-mate); font-size: 1.8rem; transition: 0.3s; }
 
         /* --- CARRITO --- */
-        .carrito-float {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background: var(--oro);
-            color: black;
-            padding: 15px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 800;
-            z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-        }
-
-        #modalCarrito {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-        }
-
-        .modal-content {
-            background: #111;
-            margin: 10% auto;
-            padding: 30px;
-            max-width: 400px;
-            width: 85%;
-            border-radius: 25px;
-            border: 1px solid var(--oro-mate);
-        }
-
-        .item-carrito { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
+        .cart-btn { position: fixed; bottom: 25px; right: 20px; background: var(--oro); color: black; padding: 15px 20px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 10px; z-index: 1000; }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.jpeg.jpeg" alt="Logo" class="logo-img">
+    <img src="logo.jpeg.jpeg" class="logo-principal">
     <h1>LA VIDA ES BELLA</h1>
-    <div class="tagline">GASTROBAR</div>
-    <div class="direccion">Avenida de los Estudiantes frente al antiguo Seguro Social - Tumaco</div>
-    
-    <div class="domicilios-banner">
-        <span style="color:var(--oro); font-weight: bold;">🛵 ¡DOMICILIOS ACTIVOS!</span><br>
-        <small>Pide ahora al 324 881 652</small>
-    </div>
+    <div class="direccion">Frente al antiguo Seguro Social - Tumaco</div>
 </header>
+
+<div class="swiper mySwiper">
+    <div class="swiper-wrapper" id="riel-almuerzos"></div>
+</div>
+
+<div class="banner-domi">
+    <i class="fas fa-motorcycle"></i>
+    <p>¡Servicio a domicilio disponible! Pide al WhatsApp</p>
+</div>
 
 <div class="categorias">
     <button class="btn-cat active" onclick="filtrar('todos', this)">TODOS</button>
-    <button class="btn-cat" onclick="filtrar('mar', this)">🦐 MAR</button>
     <button class="btn-cat" onclick="filtrar('almuerzo', this)">🍽️ ALMUERZOS</button>
+    <button class="btn-cat" onclick="filtrar('mar', this)">🦐 MAR</button>
     <button class="btn-cat" onclick="filtrar('rapida', this)">🍔 RÁPIDAS</button>
     <button class="btn-cat" onclick="filtrar('bebida', this)">🍹 BEBIDAS</button>
 </div>
 
-<div class="container" id="menu-container"></div>
+<div class="container" id="menu-items"></div>
 
-<div class="social-contacts">
-    <h3>CONTÁCTANOS</h3>
-    <div class="social-icons-wrapper">
-        <a href="https://wa.me/57324881652" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://www.facebook.com/p/GastroBar-La-Vida-es-Bella-61554548353990/" target="_blank" class="social-icon"><i class="fab fa-facebook"></i></a>
-        <a href="https://www.instagram.com/lavidaesbella_gastrobar/" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-        <a href="tel:+57324881652" class="social-icon"><i class="fas fa-phone-alt"></i></a>
+<footer>
+    <h4>Contáctanos y Síguenos</h4>
+    <div class="social-icons">
+        <a href="https://wa.me/57324881652"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/p/GastroBar-La-Vida-es-Bella-61554548353990/"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/lavidaesbella_gastrobar/"><i class="fab fa-instagram"></i></a>
     </div>
-</div>
+</footer>
 
-<div class="carrito-float" onclick="abrirCarrito()">
+<div class="cart-btn" onclick="abrirCarrito()">
     <i class="fas fa-shopping-cart"></i>
     <span id="resumen-total">$0 (0)</span>
 </div>
 
-<div id="modalCarrito">
-    <div class="modal-content">
-        <h2 style="color:var(--oro); font-family: 'Playfair Display'; margin-top: 0; text-transform: uppercase;">Tu Pedido</h2>
-        <div id="lista-carrito"></div>
-        <textarea id="notas" placeholder="Ej. Sin cebolla, dirección de entrega..." style="width:100%; background:#000; border:1px solid #333; color:white; padding:10px; margin:15px 0; border-radius:10px;"></textarea>
-        <div style="font-size:1.5rem; font-weight:bold; text-align:right; margin-bottom:20px; color:var(--cian);">Total: <span id="modal-total">$0</span></div>
-        <button onclick="enviarPedido()" style="width:100%; padding:15px; background:var(--oro); border:none; border-radius:15px; font-weight:bold; cursor:pointer; text-transform: uppercase;">🚀 PEDIR DOMICILIO (WHATSAPP)</button>
-        <p onclick="cerrarCarrito()" style="text-align:center; margin-top:15px; cursor:pointer; color:#888; text-transform: uppercase;">Cerrar</p>
-    </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     const PRODUCTOS = [
-        { cat: 'almuerzo', nombre: 'Almuerzo Ejecutivo', precio: 16000, img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500' },
         { cat: 'mar', nombre: 'Cazuela de Mariscos Gold', precio: 38000, img: 'https://www.elespectador.com/resizer/pXpi8kkyhFeyYZ5Q7iaZ4BB61sg=/arc-anglerfish-arc2-prod-elespectador/public/MVSY2N7QVNHTJKSDLZZVKZIQTQ.jpg' },
         { cat: 'mar', nombre: 'Pargo Rojo Frito', precio: 34000, img: 'https://nochesclifton.com/wp-content/uploads/2024/10/Blood-sausage.-13-1.jpg' },
-        { cat: 'mar', nombre: 'Ceviche de Camarón ', precio: 32000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh2xMmw4bVT_0ygK1hTrPgthGXJjTbhThF8Q&s' },
+        { cat: 'mar', nombre: 'Ceviche de Camarón', precio: 32000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh2xMmw4bVT_0ygK1hTrPgthGXJjTbhThF8Q&s' },
+        { cat: 'mar', nombre: 'Salmón en Salsa de Eneldo', precio: 42000, img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500' },
+        { cat: 'almuerzo', nombre: 'Almuerzo Ejecutivo', precio: 15000, img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500' },
         { cat: 'almuerzo', nombre: 'Punta de Anca Grill', precio: 32000, img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500' },
+        { cat: 'almuerzo', nombre: 'Pechuga a la Plancha', precio: 22000, img: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500' },
+        { cat: 'almuerzo', nombre: 'Bandeja Paisa', precio: 25000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvPzmg8pTnT5itu8TXhOhvXL33m4x4qsXPjg&sw=500' },
         { cat: 'rapida', nombre: 'Hamburguesa La Bella', precio: 18000, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500' },
         { cat: 'rapida', nombre: 'Perro Caliente Especial', precio: 14000, img: 'https://img-global.cpcdn.com/recipes/8770acd028f8cd4a/120x160cq50/perro-caliente-caseros-foto-principal.jpg' },
+        { cat: 'rapida', nombre: 'Salchipapa con Queso', precio: 20000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZIGaBqyLhUky8mEgta33rkh-3Nk-wjt75Ng&s' },
+        { cat: 'rapida', nombre: 'Club House Sandwich', precio: 16000, img: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500' },
         { cat: 'bebida', nombre: 'Mojito Maracuyá', precio: 12000, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500' },
         { cat: 'bebida', nombre: 'Limonada de Coco', precio: 9000, img: 'https://cdn.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=375,fit=scale-down/cdn-ecommerce/store_01JJADVM5E8SXR9HKC2HMH4718%2Fassets%2F1738691234765-limonadadecoco2.jpg' }
     ];
 
-    let carrito = [];
+    function cargarRiel() {
+        const almuerzos = PRODUCTOS.filter(p => p.cat === 'almuerzo');
+        document.getElementById('riel-almuerzos').innerHTML = almuerzos.map(p => `
+            <div class="swiper-slide">
+                <img src="${p.img}">
+                <div class="slide-caption">${p.nombre}</div>
+            </div>
+        `).join('');
+        new Swiper(".mySwiper", { loop: true, autoplay: { delay: 3000 } });
+    }
 
-    function renderMenu(productosFiltrados) {
-        const container = document.getElementById('menu-container');
-        container.innerHTML = productosFiltrados.map((p) => `
+    function renderMenu(lista) {
+        document.getElementById('menu-items').innerHTML = lista.map(p => `
             <div class="card">
-                <img src="${p.img}" alt="${p.nombre}">
+                <img src="${p.img}">
                 <div class="info">
-                    <h3 style="margin:0; text-transform: uppercase; font-size: 1.1rem;">${p.nombre}</h3>
+                    <h3>${p.nombre}</h3>
                     <span class="precio">$${p.precio.toLocaleString()}</span>
-                    <button class="btn-agregar" onclick="agregarAlCarrito('${p.nombre}', ${p.precio})">AGREGAR AL PEDIDO</button>
+                    <button class="btn-add" onclick="agregar('${p.nombre}', ${p.precio})">AGREGAR</button>
                 </div>
             </div>
         `).join('');
     }
 
-    function filtrar(categoria, btn) {
+    let carrito = [];
+    function agregar(n, p) {
+        carrito.push({ nombre: n, precio: p });
+        document.getElementById('resumen-total').innerText = `$${carrito.reduce((s,i)=>s+i.precio,0).toLocaleString()} (${carrito.length})`;
+    }
+
+    function filtrar(cat, btn) {
         document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const filtrados = categoria === 'todos' ? PRODUCTOS : PRODUCTOS.filter(p => p.cat === categoria);
-        renderMenu(filtrados);
+        renderMenu(cat === 'todos' ? PRODUCTOS : PRODUCTOS.filter(p => p.cat === cat));
     }
 
-    function agregarAlCarrito(nombre, precio) {
-        carrito.push({ nombre, precio });
-        actualizarResumen();
-    }
-
-    function actualizarResumen() {
-        const total = carrito.reduce((sum, p) => sum + p.precio, 0);
-        document.getElementById('resumen-total').innerText = `$${total.toLocaleString()} (${carrito.length})`;
-    }
-
-    function abrirCarrito() {
-        const modal = document.getElementById('modalCarrito');
-        const lista = document.getElementById('lista-carrito');
-        modal.style.display = 'block';
-        lista.innerHTML = carrito.map((item) => `
-            <div class="item-carrito">
-                <span>${item.nombre}</span>
-                <span>$${item.precio.toLocaleString()}</span>
-            </div>
-        `).join('');
-        const total = carrito.reduce((sum, p) => sum + p.precio, 0);
-        document.getElementById('modal-total').innerText = `$${total.toLocaleString()}`;
-    }
-
-    function cerrarCarrito() { document.getElementById('modalCarrito').style.display = 'none'; }
-
-    function enviarPedido() {
-        if (carrito.length === 0) return alert("El carrito está vacío");
-        const notas = document.getElementById('notas').value;
-        let mensaje = "¡Hola La Vida es Bella! Quisiera pedir un domicilio:\n\n";
-        carrito.forEach(p => mensaje += `- ${p.nombre.toUpperCase()} ($${p.precio})\n`);
-        const total = carrito.reduce((sum, p) => sum + p.precio, 0);
-        mensaje += `\n*TOTAL: $${total.toLocaleString()}*`;
-        if(notas) mensaje += `\n\n*Dirección/Notas:* ${notas}`;
-        
-        const url = `https://wa.me/57324881652?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-    }
-
+    cargarRiel();
     renderMenu(PRODUCTOS);
 </script>
-
 </body>
 </html>
