@@ -3,243 +3,873 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Comandas | La Vida es Bella</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Admin Core V7 | La Vida es Bella</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
         :root {
-            --bg: #0c0e10;
-            --surface: #16191d;
-            --accent: #c5a059; 
-            --text-main: #e1e1e1;
-            --text-dim: #71777e;
-            --border: #262a2f;
-            --danger: #ff4d4d;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --info: #3498db;
+            --oro: #C9A84C;
+            --oro-claro: #E8C96B;
+            --oro-glow: rgba(201,168,76,0.3);
+            --cian: #00FBFF;
+            --fondo: #080706;
+            --card-bg: #100F0D;
+            --card-border: rgba(201,168,76,0.15);
+            --text-muted: #6B6560;
+            --text-soft: #B0A89E;
         }
 
-        body { 
-            background: var(--bg); color: var(--text-main); 
-            font-family: 'Inter', sans-serif; margin: 0; padding: 20px;
-            transition: background 0.3s ease;
+        body { font-family: 'DM Sans', sans-serif; background-color: var(--fondo); color: #e2e8f0; overflow: hidden; }
+        
+        /* GRAIN OVERLAY */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
         }
 
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid var(--border);
-            padding-bottom: 20px; flex-wrap: wrap; gap: 15px;
+        .glass-card { background: var(--card-bg); border: 1px solid var(--card-border); }
+        
+        .sidebar-link { color: var(--text-muted); transition: all 0.25s ease; }
+        .sidebar-link:hover { color: var(--oro-claro); }
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(201,168,76,0.12) 0%, transparent 100%); color: var(--oro); border-left: 3px solid var(--oro); }
+        
+        .content-section { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s; }
+        .content-section.active { display: block; opacity: 1; transform: translateY(0); }
+        
+        #auth-overlay, #modal-detalle, #modal-caja, #ticket, #modal-cobro { backdrop-filter: blur(12px); background: rgba(8,7,6,0.92); }
+
+        /* MODO DISCRETO */
+        .monto-discreto { transition: filter 0.3s ease; }
+        body.modo-oculto .monto-discreto { filter: blur(8px); pointer-events: none; user-select: none; }
+        
+        .fila-historial { cursor: pointer; transition: background 0.2s; }
+        .fila-historial:hover { background: rgba(201,168,76,0.03); }
+        .row-efectivo { border-left: 3px solid #10b981; }
+        .row-tarjeta { border-left: 3px solid #3b82f6; }
+        .row-nequi { border-left: 3px solid #e11d48; }
+
+        .no-admin [data-admin] {
+            display: none !important;
         }
-
-        .brand { font-size: 1.4rem; font-weight: 700; color: var(--accent); text-transform: uppercase; }
-
-        .top-stats { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .stat-badge { 
-            background: var(--surface); padding: 8px 15px; border-radius: 8px; 
-            border: 1px solid var(--border); font-size: 0.75rem; font-weight: 700;
-        }
-
-        /* DISEÑO DE COLUMNAS (KANBAN) */
-        .contenedor-estados {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px; align-items: start;
-        }
-
-        .columna {
-            background: #101214; padding: 15px; border-radius: 12px;
-            border: 1px solid var(--border); min-height: 80vh;
-        }
-
-        .columna h3 {
-            text-align: center; margin-bottom: 15px; color: var(--accent);
-            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
-            border-bottom: 1px solid #222; padding-bottom: 10px;
-        }
-
-        .card-pedido {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 10px; padding: 15px; margin-bottom: 15px;
-            position: relative; animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.7rem; color: var(--text-dim); }
-        .mesa-id { font-size: 1.2rem; font-weight: 800; margin: 5px 0; color: #fff; }
-
-        .lista-productos { margin: 10px 0; padding: 0; list-style: none; }
-        .lista-productos li { 
-            padding: 8px 0; border-bottom: 1px solid #222;
-            display: flex; justify-content: space-between; font-size: 0.9rem;
-        }
-
-        .footer-card { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #222; padding-top: 10px; }
-        .total-monto { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
-
-        .btn-group { display: flex; gap: 4px; margin-top: 10px; }
-        .btn { 
-            flex: 1; border: none; padding: 10px; border-radius: 6px; cursor: pointer;
-            font-size: 0.65rem; font-weight: 700; background: #252a30; color: white;
-            transition: 0.2s;
-        }
-        .btn:hover { filter: brightness(1.2); }
-        .btn-prep { background: var(--warning); color: black; }
-        .btn-listo { background: var(--success); }
-        .btn-ok { background: var(--info); }
-        .btn-limpiar { background: var(--danger); }
-
-        /* ALERTAS */
-        @keyframes parpadeo {
-            0% { box-shadow: 0 0 0px var(--danger); }
-            50% { box-shadow: 0 0 15px var(--danger); }
-            100% { box-shadow: 0 0 0px var(--danger); }
-        }
-        .critico { animation: parpadeo 1s infinite; border-color: var(--danger); }
-
-        .vacio { text-align: center; padding: 20px; color: var(--text-dim); font-size: 0.8rem; }
     </style>
 </head>
-<body>
-
-    <header>
-        <div class="brand">Control <span style="font-weight:300; opacity:0.4">| La Vida es Bella</span></div>
-        <div class="top-stats">
-            <div class="stat-badge" id="ventas-total" style="color:var(--accent)">$0</div>
-            <button onclick="modoCocina()" class="btn"><i class="fas fa-expand"></i> COCINA</button>
-            <button onclick="limpiarEntregados()" class="btn btn-limpiar"><i class="fas fa-broom"></i> LIMPIAR</button>
-        </div>
-    </header>
-
-    <div class="contenedor-estados">
-        <div class="columna">
-            <h3>🆕 Nuevos</h3>
-            <div id="col-pendiente"></div>
-        </div>
-        <div class="columna">
-            <h3>🔥 Preparando</h3>
-            <div id="col-preparando"></div>
-        </div>
-        <div class="columna">
-            <h3>✅ Listos</h3>
-            <div id="col-listo"></div>
-        </div>
-        <div class="columna">
-            <h3>📦 Entregados</h3>
-            <div id="col-entregado"></div>
+<body class="modo-oculto">
+    
+    <div id="modal-detalle" class="fixed inset-0 z-[300] hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-lg glass-card rounded-[2rem] p-8 border border-amber-900/20">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 id="modal-titulo" class="text-2xl font-black text-white" style="font-family: 'Cormorant Garamond', serif;">DETALLE</h3>
+                    <p id="modal-subtitulo" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest"></p>
+                </div>
+                <button onclick="cerrarModal()" class="text-zinc-500 hover:text-[var(--oro)]"><i class="fas fa-times-circle text-2xl text-[var(--oro)]"></i></button>
+            </div>
+            <div id="modal-lista-productos" class="space-y-3 max-h-60 overflow-y-auto mb-6 pr-2"></div>
+            <div class="border-t border-zinc-900 pt-6 flex justify-between items-center">
+                <span class="text-zinc-500 font-black text-[10px] uppercase tracking-widest">Total</span>
+                <span id="modal-total" class="text-3xl font-black text-[var(--oro)] font-mono monto-discreto"></span>
+            </div>
+            <button onclick="window.print()" class="w-full mt-6 py-3 bg-[var(--oro)] text-black font-black text-xs rounded-xl hover:brightness-110 transition-all">
+                <i class="fas fa-print mr-2"></i> Imprimir Ticket
+            </button>
         </div>
     </div>
 
-    <audio id="sonido-nuevo" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-    <audio id="sonido-listo" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <div id="auth-overlay" class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="w-full max-w-md p-8 glass-card rounded-[2rem] border border-amber-900/20 text-center">
+            <img src="logo.jpeg" class="w-24 h-24 mx-auto rounded-full mb-6 border border-[var(--oro)]/30 p-1 object-cover" alt="Logo">
+            <h2 class="text-xl font-extrabold text-white uppercase mb-8 tracking-tighter" style="font-family: 'Cormorant Garamond', serif;">Panel de Control</h2>
+            <div class="space-y-4">
+                <input type="email" id="login-email" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white outline-none focus:border-[var(--oro)]" placeholder="Email">
+                <input type="password" id="login-pass" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white outline-none focus:border-[var(--oro)]" placeholder="Contraseña">
+                <button onclick="handleLogin()" class="w-full bg-[var(--oro)] text-black font-black py-4 rounded-2xl shadow-lg transition-all hover:brightness-110">ENTRAR</button>
+            </div>
+        </div>
+    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <div id="dashboard-ui" class="flex h-screen opacity-0 transition-opacity duration-700">
+        <aside class="w-64 bg-zinc-950 border-r border-zinc-900 flex flex-col">
+            <div class="p-6 border-b border-zinc-900 flex items-center gap-3">
+                <img src="logo.jpeg" class="w-8 h-8 rounded-full" alt="Logo">
+                <span class="font-black text-[10px] uppercase tracking-tighter text-[var(--oro)]">La Vida es Bella</span>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 mt-4">
+                <a href="#" onclick="showSection('resumen')" id="link-resumen" class="sidebar-link flex items-center p-4 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    <i class="fas fa-cash-register mr-3"></i> Caja
+                </a>
+                <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link flex items-center p-4 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    <i class="fas fa-utensils mr-3"></i> Cocina
+                </a>
+                <a href="#" onclick="showSection('historial')" id="link-historial" class="sidebar-link flex items-center p-4 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    <i class="fas fa-history mr-3"></i> Historial
+                </a>
+            </nav>
+            
+            <div class="p-4 text-[10px] text-zinc-500 font-bold border-t border-zinc-900">
+                <p class="mb-1"><i class="fas fa-phone mr-2 text-[var(--oro)]"></i> Tel: 324881652</p>
+                <p><i class="fab fa-instagram mr-2 text-[var(--oro)]"></i> @LaVidaEsBella</p>
+            </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCDlGrzItpJAhtlrDyXLbIX46osGOk3k2s",
-            authDomain: "la-vida-es-bella-a2e72.firebaseapp.com",
-            databaseURL: "https://la-vida-es-bella-a2e72-default-rtdb.firebaseio.com",
-            projectId: "la-vida-es-bella-a2e72",
-            storageBucket: "la-vida-es-bella-a2e72.firebasestorage.app",
-            messagingSenderId: "622395641878",
-            appId: "1:622395641878:web:bc3afbeb29d73a59e8a537"
-        };
+            <div class="p-4 border-t border-zinc-900">
+                <button onclick="toggleDiscreto()" class="w-full flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 text-[10px] font-black uppercase tracking-widest transition-all">
+                    <span>Modo Discreto</span>
+                    <i id="eye-icon" class="fas fa-eye-slash text-[var(--oro)]"></i>
+                </button>
+            </div>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        let prevCount = 0;
+            <button onclick="handleLogout()" class="m-6 p-4 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest border border-zinc-900 rounded-xl transition-all">Salir</button>
+        </aside>
 
-        db.ref("pedidos").on("value", (snap) => {
-            const data = snap.val() || {};
-            renderizar(data);
-        });
+        <main class="flex-1 overflow-y-auto bg-black">
+            <header class="h-20 border-b border-zinc-900 flex items-center justify-between px-10 sticky top-0 bg-black/50 backdrop-blur-xl z-50">
+                <div class="flex items-center gap-4">
+                    <h2 id="section-title" class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Panel Admin</h2>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div id="reloj" class="text-xs font-black text-[var(--oro)] font-mono">00:00:00</div>
+                </div>
+            </header>
 
-        function renderizar(data) {
-            const cols = {
-                pendiente: document.getElementById("col-pendiente"),
-                preparando: document.getElementById("col-preparando"),
-                listo: document.getElementById("col-listo"),
-                entregado: document.getElementById("col-entregado")
-            };
-
-            // Limpiar columnas
-            Object.values(cols).forEach(c => c.innerHTML = "");
-
-            let totalVentas = 0;
-            let currentActivos = 0;
-            const items = Object.entries(data).sort((a, b) => (a[1].timestamp || 0) - (b[1].timestamp || 0));
-
-            items.forEach(([id, p]) => {
-                const estado = p.estado || 'pendiente';
-                if (estado === 'entregado') totalVentas += (p.total || 0);
-                if (estado === 'pendiente') currentActivos++;
-
-                const min = p.timestamp ? Math.floor((Date.now() - p.timestamp) / 60000) : 0;
-                const urgencia = (estado !== 'entregado' && min >= 15) ? 'critico' : '';
-
-                const html = `
-                    <div class="card-pedido ${urgencia}" data-time="${p.timestamp}">
-                        <div class="card-header">
-                            <span class="tiempo-txt"><i class="far fa-clock"></i> Hace ${min}m</span>
-                            <span>#${id.slice(-4).toUpperCase()}</span>
+            <div class="p-8">
+                <section id="resumen" class="content-section active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-card p-8 rounded-[2rem]">
+                            <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Ingresos Hoy</p>
+                            <h3 id="totalHoy" class="text-4xl font-black text-white font-mono monto-discreto" style="color: var(--oro);">$0</h3>
                         </div>
-                        <h2 class="mesa-id">Mesa ${p.mesa}</h2>
-                        <ul class="lista-productos">
-                            ${(p.items || []).map(i => `<li>${i.nombre} <span>$${(i.precio || 0).toLocaleString()}</span></li>`).join('')}
-                        </ul>
-                        <div class="footer-card">
-                            <span class="total-monto">$${(p.total || 0).toLocaleString()}</span>
-                            <button class="btn" style="width:40px" onclick="borrar('${id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <div class="btn-group">
-                            ${estado === 'pendiente' ? `<button class="btn btn-prep" onclick="cambiarEstado('${id}','preparando')">PREPARAR</button>` : ''}
-                            ${estado === 'preparando' ? `<button class="btn btn-listo" onclick="cambiarEstado('${id}','listo')">LISTO</button>` : ''}
-                            ${estado === 'listo' ? `<button class="btn btn-ok" onclick="cambiarEstado('${id}','entregado')">ENTREGAR</button>` : ''}
+                        <div class="glass-card p-8 rounded-[2rem]">
+                            <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Por Cobrar</p>
+                            <h3 id="pendiente" class="text-4xl font-black font-mono monto-discreto text-amber-500">$0</h3>
                         </div>
                     </div>
-                `;
 
-                if (cols[estado]) cols[estado].insertAdjacentHTML("beforeend", html);
-            });
+                    <div class="mb-8">
+                        <h2 class="text-xl font-black mb-4 uppercase tracking-tighter text-white" style="font-family: 'Cormorant Garamond', serif;">Menú y Especialidades</h2>
+                        <div class="flex overflow-x-auto gap-6 pb-4">
+                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
+                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Almuerzos">
+                                <span class="text-xs font-bold text-white">Almuerzos</span>
+                            </div>
+                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
+                                <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Mariscos">
+                                <span class="text-xs font-bold text-white">Mariscos</span>
+                            </div>
+                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
+                                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Pizza">
+                                <span class="text-xs font-bold text-white">Especiales</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-xl font-black uppercase tracking-tighter text-white" style="font-family: 'Cormorant Garamond', serif;">Cuentas Abiertas por Mesa</h2>
+                    </div>
+                    <div class="glass-card rounded-[2rem] overflow-hidden mb-8">
+                        <table class="w-full text-left">
+                            <tbody id="mesas-caja" class="divide-y divide-zinc-900"></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-card p-6 rounded-[2rem]">
+                            <h4 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Acciones de Caja</h4>
+                            <div class="space-y-3">
+                                <button data-admin onclick="abrirCajaModal()" class="w-full py-4 bg-zinc-900 border border-[var(--oro)]/30 text-[var(--oro)] font-black text-xs rounded-xl hover:bg-[var(--oro)]/10 transition-all">
+                                    <i class="fas fa-wallet mr-2"></i> Abrir Caja / Ingresar Base
+                                </button>
+                                <button data-admin onclick="cerrarCaja()" class="w-full py-4 bg-red-900/20 border border-red-500/30 text-red-400 font-black text-xs rounded-xl hover:bg-red-900/40 transition-all">
+                                    <i class="fas fa-lock mr-2"></i> Cerrar Caja
+                                </button>
+                                <button data-admin onclick="generarReporte()" class="w-full py-4 bg-[var(--oro)] text-black font-black text-xs rounded-xl hover:brightness-110 transition-all">
+                                    <i class="fas fa-file-invoice-dollar mr-2"></i> Generar Reporte de Cierre
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card p-6 rounded-[2rem]">
+                            <h4 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Información del Sistema</h4>
+                            <div class="flex justify-between text-xs text-zinc-400 mb-2">
+                                <span>Estado de la red:</span>
+                                <span class="text-green-500 font-bold"><i class="fas fa-circle text-[8px] animate-pulse mr-1"></i> Conectado</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-zinc-400">
+                                <span>Terminal:</span>
+                                <span class="text-white font-bold">Admin Core V7</span>
+                            </div>
+                        </div>
+                    </div>
 
-            // Notificaciones
-            if (currentActivos > prevCount && prevCount !== 0) {
-                document.getElementById("sonido-nuevo").play().catch(()=>{});
-                document.body.style.background = "#251414";
-                setTimeout(() => { document.body.style.background = "var(--bg)"; }, 400);
+                    <div class="glass-card p-6 rounded-[2rem] mt-6">
+                        <h4 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Ventas por Hora</h4>
+                        <div class="w-full h-64">
+                            <canvas id="graficaVentas"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="historial" class="content-section">
+                    <h2 class="text-xl font-black mb-6 uppercase tracking-tighter" style="font-family: 'Cormorant Garamond', serif;">Ventas Realizadas</h2>
+                    <div class="glass-card rounded-[2rem] overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead class="bg-zinc-950 text-[10px] font-black uppercase text-zinc-500">
+                                <tr>
+                                    <th class="p-5">Hora</th>
+                                    <th class="p-5">Mesa</th>
+                                    <th class="p-5">Pago</th>
+                                    <th class="p-5 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-historial" class="divide-y divide-zinc-900"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="pedidos" class="content-section">
+                    <h2 class="text-xl font-black mb-6 uppercase tracking-tighter text-white" style="font-family: 'Cormorant Garamond', serif;">Monitor de Cocina</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="monitor-pedidos"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-caja" class="fixed inset-0 z-[300] hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass-card rounded-[2rem] p-8 border border-amber-900/20 text-center">
+            <h3 class="text-xl font-black text-white mb-4 uppercase tracking-tighter" style="font-family: 'Cormorant Garamond', serif;">Ingresar Base de Caja</h3>
+            <p class="text-xs text-zinc-500 mb-6">Agregue el efectivo inicial para el turno</p>
+            <input type="number" id="input-base-caja" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white text-center text-lg outline-none focus:border-[var(--oro)] mb-6 font-mono font-black" placeholder="$0">
+            <div class="flex gap-4">
+                <button onclick="cerrarCajaModal()" class="flex-1 py-3 border border-zinc-800 text-zinc-400 rounded-xl text-xs font-black">CANCELAR</button>
+                <button onclick="guardarBaseCaja()" class="flex-1 py-3 bg-[var(--oro)] text-black rounded-xl text-xs font-black">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cobro" class="hidden fixed inset-0 flex items-center justify-center bg-black/80 z-[400]">
+        <div class="glass-card p-8 rounded-[2rem] w-96 border border-amber-900/20">
+            <h2 class="text-white text-lg font-black tracking-tighter uppercase mb-4" style="font-family: 'Cormorant Garamond', serif;">Cobrar Mesa</h2>
+
+            <p class="text-zinc-500 text-[9px] uppercase tracking-widest mb-1">Total a pagar:</p>
+            <h3 id="total-cobro" class="text-3xl text-[var(--oro)] font-bold mb-4 font-mono">$0</h3>
+
+            <label class="flex items-center gap-2 mb-4">
+                <input type="checkbox" id="propina-check">
+                <span class="text-xs text-zinc-400">Incluir propina (10%)</span>
+            </label>
+
+            <input type="number" id="dinero-recibido" placeholder="Dinero recibido"
+                class="w-full p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none focus:border-[var(--oro)] font-mono text-sm mb-3" oninput="calcularCambio()">
+
+            <p class="text-zinc-500 text-[9px] uppercase tracking-widest mb-1">Cambio:</p>
+            <h3 id="cambio" class="text-xl text-green-400 font-mono mb-6">$0</h3>
+
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button onclick="confirmarCobro('Efectivo')" class="bg-emerald-900/20 border border-emerald-500/30 text-emerald-500 py-2.5 text-[10px] font-black rounded-xl transition hover:bg-emerald-500/10">EFECTIVO</button>
+                <button onclick="confirmarCobro('Tarjeta')" class="bg-blue-900/20 border border-blue-500/30 text-blue-500 py-2.5 text-[10px] font-black rounded-xl transition hover:bg-blue-500/10">TARJETA</button>
+                <button onclick="confirmarCobro('Nequi')" class="bg-pink-900/20 border border-pink-500/30 text-pink-500 py-2.5 text-[10px] font-black rounded-xl transition hover:bg-pink-500/10">NEQUI</button>
+            </div>
+
+            <button onclick="cerrarModalCobro()" class="w-full py-2.5 bg-zinc-900 text-zinc-400 font-bold text-xs rounded-xl border border-zinc-800 transition-all hover:bg-zinc-800">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="ticket" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[400]">
+        <div class="bg-white text-black p-6 rounded-xl w-80">
+            <h2 class="text-center font-bold mb-4">LA VIDA ES BELLA</h2>
+            <div id="ticket-content"></div>
+            <button onclick="window.print()" class="w-full mt-4 bg-black text-white py-2 rounded">Imprimir</button>
+            <button onclick="document.getElementById('ticket').classList.add('hidden')" class="w-full mt-2 bg-gray-300 text-black py-2 rounded">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        firebase.initializeApp({
+            apiKey: "AIzaSyCDlGrzItpJAhtlrDyXLbIX46osGOk3k2s",
+            authDomain: "la-vida-es-bella-a2e72.firebaseapp.com",
+            projectId: "la-vida-es-bella-a2e72"
+        });
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const sonido = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3");
+
+        let chartInstance = null;
+        let pedidosPrevios = 0;
+        let mesaActual = null;
+        let totalActual = 0;
+
+        function reproducirSonido() {
+            sonido.currentTime = 0;
+            sonido.play().catch(() => {});
+        }
+
+        function toggleDiscreto() {
+            const body = document.body;
+            const icon = document.getElementById('eye-icon');
+            body.classList.toggle('modo-oculto');
+            
+            if(body.classList.contains('modo-oculto')) {
+                icon.className = 'fas fa-eye-slash text-[var(--oro)]';
+            } else {
+                icon.className = 'fas fa-eye text-zinc-500';
             }
-            prevCount = currentActivos;
-            document.getElementById("ventas-total").innerText = `$${totalVentas.toLocaleString()}`;
         }
 
-        function cambiarEstado(id, st) {
-            db.ref("pedidos/" + id).update({ estado: st });
-            if (st === "listo") document.getElementById("sonido-listo").play().catch(()=>{});
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            auth.signInWithEmailAndPassword(email, pass);
         }
 
-        function borrar(id) { if(confirm("¿Eliminar este pedido?")) db.ref("pedidos/" + id).remove(); }
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                try {
+                    const doc = await db.collection("usuarios").doc(user.uid).get();
+                    if (doc.exists) {
+                        const rol = doc.data().rol;
+                        aplicarSeguridadUI(rol);
+                    }
+                } catch(e) {
+                    console.log("No se pudo verificar el rol en la base de datos.");
+                }
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('dashboard-ui').classList.remove('opacity-0');
+                iniciarEscuchas();
+            } else {
+                document.getElementById('auth-overlay').classList.remove('hidden');
+                document.getElementById('dashboard-ui').classList.add('opacity-0');
+            }
+        });
 
-        function limpiarEntregados() {
-            if(!confirm("¿Borrar historial de entregados?")) return;
-            db.ref("pedidos").once("value", snap => {
-                snap.forEach(child => { if(child.val().estado === "entregado") child.ref.remove(); });
-            });
+        function aplicarSeguridadUI(rol) {
+            if (rol !== "admin") {
+                document.body.classList.add("no-admin");
+            }
         }
 
-        function modoCocina() {
-            const currentZoom = document.body.style.zoom || "1";
-            document.body.style.zoom = currentZoom === "1" ? "1.2" : "1";
-        }
+        function handleLogout() { auth.signOut(); }
 
-        // Actualizar los textos de tiempo cada minuto
         setInterval(() => {
-            document.querySelectorAll(".card-pedido").forEach(card => {
-                const time = card.getAttribute("data-time");
-                const min = Math.floor((Date.now() - parseInt(time)) / 60000);
-                card.querySelector(".tiempo-txt").innerHTML = `<i class="far fa-clock"></i> Hace ${min}m`;
+            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES', { hour12: false });
+        }, 1000);
+        
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('link-' + id).classList.add('active');
+            
+            const titles = {
+                'resumen': 'Panel Admin / Caja',
+                'pedidos': 'Monitor de Cocina',
+                'historial': 'Ventas Realizadas'
+            };
+            document.getElementById('section-title').innerText = titles[id] || 'Panel Admin';
+        }
+
+        function iniciarEscuchas() {
+            db.collection("pedidos")
+                .where("pagado", "==", false)
+                .onSnapshot(snap => {
+                let datosMesas = {}; 
+                let totalP = 0;
+                const monitor = document.getElementById("monitor-pedidos");
+                monitor.innerHTML = "";
+
+                if (snap.size > pedidosPrevios) {
+                    reproducirSonido();
+                }
+                pedidosPrevios = snap.size;
+
+                let html = "";
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    datosMesas[p.mesa] = (datosMesas[p.mesa] || 0) + (p.total || 0);
+                    totalP += (p.total || 0);
+                    
+                    if (p.estado !== "DESPACHADO" && !p.visto) {
+                        html += `
+                        <div class="glass-card p-6 rounded-[2rem] border-t-2 border-[var(--oro)]/50">
+                            <div class="mb-4"><span class="bg-[var(--oro)] text-black px-3 py-1 rounded-full text-[10px] font-black uppercase">Mesa ${p.mesa}</span></div>
+                            <div class="space-y-1 mb-6">
+                                ${(p.items || []).slice(0, 20).map(i => `<div class="flex justify-between text-xs font-bold text-zinc-400"><span>${i.nombre}</span><span>x${i.cantidad}</span></div>`).join('')}
+                            </div>
+                            <button onclick="despachar('${doc.id}')" class="w-full bg-zinc-100 text-black py-3 rounded-xl text-[10px] font-black transition-all hover:bg-[var(--oro-claro)]">LISTO</button>
+                        </div>`;
+                    }
+                });
+                
+                monitor.innerHTML = html;
+                document.getElementById("pendiente").innerText = "$" + totalP.toLocaleString();
+                renderCaja(datosMesas);
+                
+                if (snap.empty) {
+                    monitor.innerHTML = `
+                        <div class="col-span-3 text-center py-12">
+                            <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                            <p class="text-xs text-zinc-500 font-bold uppercase tracking-widest">No hay pedidos pendientes en la cocina</p>
+                        </div>
+                    `;
+                }
             });
-        }, 60000);
+
+            const hoy = new Date(); 
+            hoy.setHours(0,0,0,0);
+            
+            db.collection("cobros_detallados").where("fecha", ">=", hoy).orderBy("fecha", "desc").onSnapshot(snap => {
+                const lista = document.getElementById("lista-historial");
+                let totalC = 0;
+                let agrupado = {};
+                lista.innerHTML = "";
+
+                snap.forEach(doc => {
+                    const v = doc.data();
+                    totalC += v.total;
+                    const tr = document.createElement('tr');
+
+                    let clasePago = 'row-efectivo';
+                    if (v.metodo === 'Tarjeta') clasePago = 'row-tarjeta';
+                    if (v.metodo === 'Nequi') clasePago = 'row-nequi';
+
+                    tr.className = `fila-historial ${clasePago}`;
+                    
+                    const fechaObj = v.fecha.toDate ? v.fecha.toDate() : new Date(v.fecha);
+                    const horaFormateada = fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    tr.innerHTML = `
+                        <td class="p-5 font-mono text-zinc-500">${horaFormateada}</td>
+                        <td class="p-5 font-black">MESA ${v.mesa}</td>
+                        <td class="p-5"><span class="px-2 py-1 rounded text-[9px] font-bold bg-zinc-900">${v.metodo ? v.metodo.toUpperCase() : ''}</span></td>
+                        <td class="p-5 text-right font-bold text-white monto-discreto">$${v.total.toLocaleString()}</td>
+                    `;
+                    tr.onclick = () => verDetalle(v);
+                    lista.appendChild(tr);
+
+                    const horaH = fechaObj.getHours();
+                    agrupado[horaH] = (agrupado[horaH] || 0) + v.total;
+                });
+                
+                document.getElementById("totalHoy").innerText = "$" + totalC.toLocaleString();
+                
+                let dataGrafica = [];
+                for (let i = 0; i < 24; i++) {
+                    dataGrafica.push({
+                        hora: i + ":00",
+                        total: agrupado[i] || 0
+                    });
+                }
+
+                if (dataGrafica.length > 0) {
+                    cargarGrafica(dataGrafica);
+                }
+            });
+        }
+
+        function renderCaja(datos) {
+            const cont = document.getElementById("mesas-caja");
+            cont.innerHTML = "";
+            
+            if (Object.keys(datos).length === 0) {
+                cont.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-xs text-zinc-500 font-bold tracking-widest uppercase">No hay cuentas activas</td></tr>`;
+                return;
+            }
+
+            Object.keys(datos).sort((a,b)=>a-b).forEach(mesa => {
+                cont.innerHTML += `
+                    <tr>
+                        <td class="p-6 font-black text-white text-xs">MESA ${mesa}</td>
+                        <td class="p-6 font-bold text-xl text-[var(--oro)] font-mono monto-discreto">$${datos[mesa].toLocaleString()}</td>
+                        <td class="p-6 text-right">
+                            <div class="flex gap-2 justify-end">
+                                <button onclick="abrirModalCobro('${mesa}', ${datos[mesa]})" class="px-3 py-1.5 bg-zinc-900 border border-[var(--oro)]/30 text-[var(--oro)] text-[9px] font-black rounded-lg transition hover:bg-[var(--oro)]/10">COBRAR</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function verDetalle(venta) {
+            document.getElementById('modal-titulo').innerText = `MESA ${venta.mesa}`;
+            const fechaObj = venta.fecha.toDate ? venta.fecha.toDate() : new Date(venta.fecha);
+            document.getElementById('modal-subtitulo').innerText = `${venta.metodo} | ${fechaObj.toLocaleTimeString()}`;
+            document.getElementById('modal-total').innerText = `$${venta.total.toLocaleString()}`;
+            
+            const lista = document.getElementById('modal-lista-productos');
+            lista.innerHTML = (venta.items || []).slice(0, 20).map(item => `
+                <div class="flex justify-between p-3 bg-zinc-900/50 rounded-xl border border-zinc-900">
+                    <span class="text-white font-bold text-xs">${item.nombre}</span>
+                    <span class="font-black text-xs" style="color: var(--oro);">x${item.cantidad}</span>
+                </div>`).join('');
+            
+            document.getElementById('modal-detalle').classList.remove('hidden');
+        }
+
+        function cerrarModal() { document.getElementById('modal-detalle').classList.add('hidden'); }
+
+        function abrirCajaModal() { document.getElementById('modal-caja').classList.remove('hidden'); }
+        function cerrarCajaModal() { document.getElementById('modal-caja').classList.add('hidden'); }
+
+        async function guardarBaseCaja() {
+            const base = parseInt(document.getElementById('input-base-caja').value);
+            if (!base || isNaN(base)) {
+                alert("Ingresa un valor válido");
+                return;
+            }
+
+            const cajaAbierta = await db.collection("cajas").where("estado", "==", "ABIERTA").get();
+            if (!cajaAbierta.empty) {
+                alert("Ya hay una caja abierta. Debe cerrarla primero.");
+                return;
+            }
+
+            await db.collection("cajas").add({
+                fecha: new Date(),
+                base: base,
+                efectivo: 0,
+                tarjeta: 0,
+                totalSistema: base,
+                estado: "ABIERTA"
+            });
+            cerrarCajaModal();
+            alert("Caja abierta correctamente");
+        }
+
+        async function cerrarCaja() {
+            const cajaSnap = await db.collection("cajas")
+                .where("estado", "==", "ABIERTA")
+                .limit(1).get();
+
+            if (cajaSnap.empty) {
+                alert("No hay caja abierta.");
+                return;
+            }
+
+            const cajaRef = cajaSnap.docs[0].ref;
+
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
+            const ventasSnap = await db.collection("cobros_detallados")
+                .where("fecha", ">=", hoy)
+                .get();
+
+            let totalSistema = 0;
+            let ventas = [];
+            let porMetodo = { Efectivo: 0, Tarjeta: 0, Nequi: 0 };
+            let porCajero = {};
+
+            ventasSnap.forEach(doc => {
+                const v = doc.data();
+                totalSistema += v.total;
+
+                if (porMetodo[v.metodo] !== undefined) {
+                    porMetodo[v.metodo] += v.total;
+                }
+
+                if (!porCajero[v.usuario]) {
+                    porCajero[v.usuario] = 0;
+                }
+                porCajero[v.usuario] += v.total;
+
+                ventas.push({
+                    mesa: v.mesa,
+                    metodo: v.metodo,
+                    total: v.total,
+                    usuario: v.usuario,
+                    fecha: v.fecha.toDate().toLocaleString()
+                });
+            });
+
+            const totalRealInput = prompt("Ingrese dinero real en caja:");
+            if (!totalRealInput) return;
+
+            const totalReal = parseInt(totalRealInput);
+            if (isNaN(totalReal)) return;
+
+            const diferencia = totalReal - totalSistema;
+
+            await cajaRef.update({
+                estado: "CERRADA",
+                totalReal,
+                diferencia
+            });
+
+            await generarReporteCompleto(ventas, totalSistema, totalReal, diferencia, porMetodo, porCajero);
+
+            alert("✅ Caja cerrada + reporte generado");
+        }
+
+        async function generarReporteCompleto(ventas, totalSistema, totalReal, diferencia, porMetodo, porCajero) {
+            const { jsPDF } = window.jsPDF;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text("REPORTE DE CIERRE - LA VIDA ES BELLA", 10, 10);
+            doc.setFontSize(10);
+            doc.text("Fecha: " + new Date().toLocaleString(), 10, 18);
+
+            let y = 30;
+
+            ventas.forEach(v => {
+                doc.text(`Mesa ${v.mesa} | ${v.metodo} | $${v.total}`, 10, y);
+                y += 5;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 10;
+                }
+            });
+
+            y += 10;
+            doc.text("=== MÉTODOS DE PAGO ===", 10, y); y+=6;
+            doc.text(`Efectivo: $${porMetodo.Efectivo}`, 10, y); y+=5;
+            doc.text(`Tarjeta: $${porMetodo.Tarjeta}`, 10, y); y+=5;
+            doc.text(`Nequi: $${porMetodo.Nequi}`, 10, y); y+=10;
+
+            doc.text("=== POR CAJERO ===", 10, y); y+=6;
+            Object.keys(porCajero).forEach(c => {
+                doc.text(`${c}: $${porCajero[c]}`, 10, y);
+                y += 5;
+            });
+
+            y += 10;
+            doc.text(`Total Sistema: $${totalSistema}`, 10, y); y+=5;
+            doc.text(`Total Real: $${totalReal}`, 10, y); y+=5;
+            doc.text(`Diferencia: $${diferencia}`, 10, y);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = 400;
+            canvas.height = 200;
+            const ctx = canvas.getContext("2d");
+
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["Efectivo", "Tarjeta", "Nequi"],
+                    datasets: [{
+                        label: "Ventas",
+                        data: [porMetodo.Efectivo, porMetodo.Tarjeta, porMetodo.Nequi],
+                        backgroundColor: '#C9A84C'
+                    }]
+                }
+            });
+
+            const img = canvas.toDataURL("image/png");
+            doc.addPage();
+            doc.text("Gráfico de Ventas", 10, 10);
+            doc.addImage(img, "PNG", 10, 20, 180, 80);
+
+            doc.save("reporte_cierre.pdf");
+
+            await db.collection("reportes").add({
+                fecha: new Date(),
+                totalSistema,
+                totalReal,
+                diferencia,
+                porMetodo,
+                porCajero,
+                cantidadVentas: ventas.length
+            });
+        }
+
+        function abrirModalCobro(mesa, total) {
+            mesaActual = mesa;
+            totalActual = total;
+            document.getElementById("total-cobro").innerText = "$" + total.toLocaleString();
+            document.getElementById("dinero-recibido").value = "";
+            document.getElementById("cambio").innerText = "$0";
+            document.getElementById("propina-check").checked = false;
+            document.getElementById("modal-cobro").classList.remove("hidden");
+        }
+
+        function cerrarModalCobro() {
+            document.getElementById("modal-cobro").classList.add("hidden");
+        }
+
+        function calcularCambio() {
+            const recibido = parseInt(document.getElementById("dinero-recibido").value) || 0;
+            const incluirPropina = document.getElementById("propina-check").checked;
+            
+            let totalActualFinal = totalActual;
+            if (incluirPropina) {
+                totalActualFinal += totalActual * 0.10;
+            }
+
+            const cambio = recibido - totalActualFinal;
+            document.getElementById("cambio").innerText = "$" + (cambio > 0 ? cambio.toLocaleString() : 0);
+        }
+
+        document.getElementById("propina-check").addEventListener('change', calcularCambio);
+
+        async function confirmarCobro(metodo) {
+            if (window.cobrando) return;
+            window.cobrando = true;
+
+            try {
+                if (!mesaActual) return;
+
+                const incluirPropina = document.getElementById("propina-check").checked;
+                let totalFinal = totalActual;
+                
+                if (incluirPropina) {
+                    totalFinal += totalActual * 0.10;
+                }
+
+                const snap = await db.collection("pedidos")
+                    .where("mesa", "==", mesaActual)
+                    .where("pagado", "==", false)
+                    .get();
+
+                if (snap.empty) {
+                    alert("⚠️ Esta mesa ya fue cobrada.");
+                    cerrarModalCobro();
+                    return;
+                }
+
+                const batch = db.batch();
+                let items = [];
+                
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    items = items.concat(data.items);
+                    batch.update(doc.ref, { 
+                        pagado: true,
+                        estado: "FINALIZADO"
+                    });
+                });
+
+                batch.set(db.collection("cobros_detallados").doc(), {
+                    mesa: mesaActual,
+                    total: totalFinal,
+                    metodo,
+                    items,
+                    propina: incluirPropina ? (totalActual * 0.10) : 0,
+                    usuario: auth.currentUser ? auth.currentUser.email : 'Sistema',
+                    fecha: new Date()
+                });
+
+                const cajaSnap = await db.collection("cajas").where("estado", "==", "ABIERTA").limit(1).get();
+                if (!cajaSnap.empty) {
+                    const cajaRef = cajaSnap.docs[0].ref;
+                    const cajaData = cajaSnap.docs[0].data();
+                    let nuevoEfectivo = cajaData.efectivo || 0;
+                    let nuevoTarjeta = cajaData.tarjeta || 0;
+
+                    if (metodo === "Efectivo") nuevoEfectivo += totalFinal;
+                    if (metodo === "Tarjeta") nuevoTarjeta += totalFinal;
+
+                    batch.update(cajaRef, {
+                        efectivo: nuevoEfectivo,
+                        tarjeta: nuevoTarjeta,
+                        totalSistema: nuevoEfectivo + nuevoTarjeta + (cajaData.base || 0)
+                    });
+                }
+
+                const mesaRef = db.collection("mesas").doc(mesaActual);
+                batch.set(mesaRef, { estado: "LIBRE" }, { merge: true });
+
+                await batch.commit();
+
+                let cambio = 0;
+                if (metodo === "Efectivo") {
+                    const recibido = parseInt(document.getElementById("dinero-recibido").value) || 0;
+                    cambio = recibido - totalFinal;
+                }
+
+                mostrarTicket(mesaActual, totalActual, metodo, items, cambio, totalFinal);
+                cerrarModalCobro();
+
+            } catch (e) {
+                console.error(e);
+            } finally {
+                window.cobrando = false;
+            }
+        }
+
+        function despachar(id) {
+            db.collection("pedidos").doc(id).update({ 
+                estado: "ENVIADO",
+                visto: true 
+            });
+        }
+
+        function mostrarTicket(mesa, total, metodo, items, cambio, totalFinal) {
+            const cont = document.getElementById("ticket-content");
+            const fecha = new Date().toLocaleString();
+            const cajero = auth.currentUser ? auth.currentUser.email : 'Admin';
+            
+            cont.innerHTML = `
+                <h3 class="font-bold text-center">LA VIDA ES BELLA</h3>
+                <p class="text-xs text-center mb-2">${fecha}</p>
+                <p class="text-xs"><strong>Cajero:</strong> ${cajero}</p>
+                <p><strong>Mesa:</strong> ${mesa}</p>
+                <p><strong>Método:</strong> ${metodo}</p>
+                <hr class="my-2 border-black">
+                ${items.map(i => `<p class="text-xs">${i.nombre} x${i.cantidad}</p>`).join('')}
+                <hr class="my-2 border-black">
+                <p>Subtotal: $${total.toLocaleString()}</p>
+                <p>Propina: $${(totalFinal - total).toLocaleString()}</p>
+                <h3 class="font-bold text-lg">Total: $${totalFinal.toLocaleString()}</h3>
+                ${cambio > 0 ? `<p class="mt-2 font-semibold">Cambio: $${cambio.toLocaleString()}</p>` : ''}
+            `;
+            
+            document.getElementById("ticket").classList.remove("hidden");
+        }
+
+        function generarReporte() {
+            const totalHoy = document.getElementById('totalHoy').innerText;
+            alert(`Reporte de cierre generado exitosamente. Total del día: ${totalHoy}`);
+        }
+
+        function cargarGrafica(data) {
+            if (chartInstance) {
+                chartInstance.data.labels = data.map(d => d.hora);
+                chartInstance.data.datasets[0].data = data.map(d => d.total);
+                chartInstance.update();
+                return;
+            }
+
+            const ctx = document.getElementById('graficaVentas').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.hora),
+                    datasets: [{
+                        label: 'Ventas por hora',
+                        data: data.map(d => d.total),
+                        backgroundColor: '#C9A84C',
+                        borderColor: '#E8C96B',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
