@@ -52,7 +52,7 @@
         .content-section { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s; }
         .content-section.active { display: block; opacity: 1; transform: translateY(0); }
         
-        #auth-overlay, #modal-detalle, #modal-caja, #ticket, #modal-cobro { backdrop-filter: blur(12px); background: rgba(8,7,6,0.92); }
+        #auth-overlay, #modal-detalle, #modal-caja, #modal-gastos, #modal-vales, #ticket, #modal-cobro { backdrop-filter: blur(12px); background: rgba(8,7,6,0.92); }
 
         /* MODO DISCRETO */
         .monto-discreto { transition: filter 0.3s ease; }
@@ -149,30 +149,49 @@
             <div class="p-8">
                 <section id="resumen" class="content-section active">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="glass-card p-8 rounded-[2rem]">
-                            <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Ingresos Hoy</p>
+                        <div class="glass-card p-8 rounded-[2rem] cursor-pointer hover:border-[var(--oro)]/50 transition-all" onclick="toggleDetalleIngresos()">
+                            <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2 flex justify-between items-center">
+                                <span>Ingresos Hoy</span>
+                                <i class="fas fa-chevron-down text-[var(--oro)] text-[8px]"></i>
+                            </p>
                             <h3 id="totalHoy" class="text-4xl font-black text-white font-mono monto-discreto" style="color: var(--oro);">$0</h3>
+                            
+                            <div id="detalle-ingresos" class="mt-4 pt-4 border-t border-zinc-900 hidden space-y-2 text-xs">
+                                <div class="flex justify-between text-zinc-400">
+                                    <span><i class="fas fa-money-bill-wave text-emerald-500 mr-2"></i> Efectivo:</span>
+                                    <span id="efectivo-hoy" class="font-bold text-white">$0</span>
+                                </div>
+                                <div class="flex justify-between text-zinc-400">
+                                    <span><i class="fas fa-credit-card text-blue-500 mr-2"></i> Tarjetas:</span>
+                                    <span id="tarjeta-hoy" class="font-bold text-white">$0</span>
+                                </div>
+                                <div class="flex justify-between text-zinc-400">
+                                    <span><i class="fas fa-mobile-alt text-pink-500 mr-2"></i> Nequi:</span>
+                                    <span id="nequi-hoy" class="font-bold text-white">$0</span>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="glass-card p-8 rounded-[2rem]">
                             <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Por Cobrar</p>
                             <h3 id="pendiente" class="text-4xl font-black font-mono monto-discreto text-amber-500">$0</h3>
                         </div>
                     </div>
 
-                    <div class="mb-8">
-                        <h2 class="text-xl font-black mb-4 uppercase tracking-tighter text-white" style="font-family: 'Cormorant Garamond', serif;">Menú y Especialidades</h2>
-                        <div class="flex overflow-x-auto gap-6 pb-4">
-                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
-                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Almuerzos">
-                                <span class="text-xs font-bold text-white">Almuerzos</span>
+                    <div class="glass-card p-8 rounded-[2rem] mb-8">
+                        <h2 class="text-xl font-black mb-6 uppercase tracking-tighter text-white" style="font-family: 'Cormorant Garamond', serif;">Resumen de Caja del Día</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-zinc-900/40 rounded-xl border border-zinc-800">
+                                <p class="text-[9px] text-zinc-500 font-black tracking-widest uppercase mb-1">Base Inicial</p>
+                                <p id="resumen-base" class="text-2xl font-black text-white font-mono">$0</p>
                             </div>
-                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
-                                <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Mariscos">
-                                <span class="text-xs font-bold text-white">Mariscos</span>
+                            <div class="p-4 bg-zinc-900/40 rounded-xl border border-zinc-800">
+                                <p class="text-[9px] text-zinc-500 font-black tracking-widest uppercase mb-1">Total Salidas / Gastos</p>
+                                <p id="resumen-gastos" class="text-2xl font-black text-red-400 font-mono">$0</p>
                             </div>
-                            <div class="min-w-[180px] glass-card rounded-2xl p-4 text-center">
-                                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" class="w-full h-24 object-cover rounded-xl mb-3" alt="Pizza">
-                                <span class="text-xs font-bold text-white">Especiales</span>
+                            <div class="p-4 bg-zinc-900/40 rounded-xl border border-zinc-800">
+                                <p class="text-[9px] text-zinc-500 font-black tracking-widest uppercase mb-1">Vales / Créditos</p>
+                                <p id="resumen-vales" class="text-2xl font-black text-amber-500 font-mono">$0</p>
                             </div>
                         </div>
                     </div>
@@ -193,6 +212,12 @@
                                 <button data-admin onclick="abrirCajaModal()" class="w-full py-4 bg-zinc-900 border border-[var(--oro)]/30 text-[var(--oro)] font-black text-xs rounded-xl hover:bg-[var(--oro)]/10 transition-all">
                                     <i class="fas fa-wallet mr-2"></i> Abrir Caja / Ingresar Base
                                 </button>
+                                <button data-admin onclick="abrirModalGasto()" class="w-full py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 font-black text-xs rounded-xl hover:bg-zinc-800 transition-all">
+                                    <i class="fas fa-minus-circle mr-2 text-red-400"></i> Registrar Gasto / Retiro
+                                </button>
+                                <button data-admin onclick="abrirModalVale()" class="w-full py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 font-black text-xs rounded-xl hover:bg-zinc-800 transition-all">
+                                    <i class="fas fa-ticket mr-2 text-amber-500"></i> Registrar Vale o Crédito
+                                </button>
                                 <button data-admin onclick="cerrarCaja()" class="w-full py-4 bg-red-900/20 border border-red-500/30 text-red-400 font-black text-xs rounded-xl hover:bg-red-900/40 transition-all">
                                     <i class="fas fa-lock mr-2"></i> Cerrar Caja
                                 </button>
@@ -208,9 +233,15 @@
                                 <span>Estado de la red:</span>
                                 <span class="text-green-500 font-bold"><i class="fas fa-circle text-[8px] animate-pulse mr-1"></i> Conectado</span>
                             </div>
-                            <div class="flex justify-between text-xs text-zinc-400">
+                            <div class="flex justify-between text-xs text-zinc-400 mb-4">
                                 <span>Terminal:</span>
                                 <span class="text-white font-bold">Admin Core V7</span>
+                            </div>
+                            <div class="border-t border-zinc-900 pt-3">
+                                <div class="flex justify-between text-xs text-zinc-400">
+                                    <span>Base Inicial Hoy:</span>
+                                    <span id="base-sistema" class="font-bold font-mono text-white">$0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -256,6 +287,32 @@
             <div class="flex gap-4">
                 <button onclick="cerrarCajaModal()" class="flex-1 py-3 border border-zinc-800 text-zinc-400 rounded-xl text-xs font-black">CANCELAR</button>
                 <button onclick="guardarBaseCaja()" class="flex-1 py-3 bg-[var(--oro)] text-black rounded-xl text-xs font-black">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-gastos" class="fixed inset-0 z-[300] hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass-card rounded-[2rem] p-8 border border-amber-900/20 text-center">
+            <h3 class="text-xl font-black text-white mb-4 uppercase tracking-tighter" style="font-family: 'Cormorant Garamond', serif;">Registrar Gasto / Retiro</h3>
+            <p class="text-xs text-zinc-500 mb-6">Salida de efectivo de la caja</p>
+            <input type="text" id="input-gasto-motivo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white text-sm outline-none focus:border-[var(--oro)] mb-3" placeholder="Motivo o concepto (ej. Pago proveedor)">
+            <input type="number" id="input-gasto-monto" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white text-lg outline-none focus:border-[var(--oro)] mb-6 font-mono font-black" placeholder="$0">
+            <div class="flex gap-4">
+                <button onclick="cerrarModalGasto()" class="flex-1 py-3 border border-zinc-800 text-zinc-400 rounded-xl text-xs font-black">CANCELAR</button>
+                <button onclick="guardarGasto()" class="flex-1 py-3 bg-[var(--oro)] text-black rounded-xl text-xs font-black">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-vales" class="fixed inset-0 z-[300] hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass-card rounded-[2rem] p-8 border border-amber-900/20 text-center">
+            <h3 class="text-xl font-black text-white mb-4 uppercase tracking-tighter" style="font-family: 'Cormorant Garamond', serif;">Registrar Vale o Crédito</h3>
+            <p class="text-xs text-zinc-500 mb-6">Crédito o vale de personal / cliente</p>
+            <input type="text" id="input-vale-persona" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white text-sm outline-none focus:border-[var(--oro)] mb-3" placeholder="Nombre de la persona">
+            <input type="number" id="input-vale-monto" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white text-lg outline-none focus:border-[var(--oro)] mb-6 font-mono font-black" placeholder="$0">
+            <div class="flex gap-4">
+                <button onclick="cerrarModalVale()" class="flex-1 py-3 border border-zinc-800 text-zinc-400 rounded-xl text-xs font-black">CANCELAR</button>
+                <button onclick="guardarVale()" class="flex-1 py-3 bg-[var(--oro)] text-black rounded-xl text-xs font-black">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -326,6 +383,71 @@
                 icon.className = 'fas fa-eye-slash text-[var(--oro)]';
             } else {
                 icon.className = 'fas fa-eye text-zinc-500';
+            }
+        }
+
+        function toggleDetalleIngresos() {
+            const detalle = document.getElementById('detalle-ingresos');
+            detalle.classList.toggle('hidden');
+        }
+
+        function abrirModalGasto() { document.getElementById('modal-gastos').classList.remove('hidden'); }
+        function cerrarModalGasto() { document.getElementById('modal-gastos').classList.add('hidden'); }
+        
+        function abrirModalVale() { document.getElementById('modal-vales').classList.remove('hidden'); }
+        function cerrarModalVale() { document.getElementById('modal-vales').classList.add('hidden'); }
+
+        async function guardarGasto() {
+            const montoInput = document.getElementById('input-gasto-monto').value;
+            const motivo = document.getElementById('input-gasto-motivo').value;
+            const monto = parseFloat(montoInput);
+
+            if(isNaN(monto) || monto <= 0 || motivo === "") {
+                alert("Por favor, ingrese un monto y un motivo válidos.");
+                return;
+            }
+
+            try {
+                await db.collection("caja_gastos").add({
+                    motivo: motivo,
+                    monto: monto,
+                    fecha: new Date(),
+                    tipo: "GASTO"
+                });
+
+                alert("Gasto registrado correctamente.");
+                cerrarModalGasto();
+                document.getElementById('input-gasto-monto').value = "";
+                document.getElementById('input-gasto-motivo').value = "";
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function guardarVale() {
+            const montoInput = document.getElementById('input-vale-monto').value;
+            const persona = document.getElementById('input-vale-persona').value;
+            const monto = parseFloat(montoInput);
+
+            if(isNaN(monto) || monto <= 0 || persona === "") {
+                alert("Por favor, ingrese un monto y una persona válida.");
+                return;
+            }
+
+            try {
+                await db.collection("caja_gastos").add({
+                    persona: persona,
+                    monto: monto,
+                    fecha: new Date(),
+                    tipo: "VALE"
+                });
+
+                alert("Vale/Crédito registrado correctamente.");
+                cerrarModalVale();
+                document.getElementById('input-vale-monto').value = "";
+                document.getElementById('input-vale-persona').value = "";
+            } catch(e) {
+                console.error(e);
             }
         }
 
@@ -433,12 +555,19 @@
             db.collection("cobros_detallados").where("fecha", ">=", hoy).orderBy("fecha", "desc").onSnapshot(snap => {
                 const lista = document.getElementById("lista-historial");
                 let totalC = 0;
+                let efectivo = 0;
+                let tarjeta = 0;
+                let nequi = 0;
                 let agrupado = {};
                 lista.innerHTML = "";
 
                 snap.forEach(doc => {
                     const v = doc.data();
                     totalC += v.total;
+                    if(v.metodo === "Efectivo") efectivo += v.total;
+                    if(v.metodo === "Tarjeta") tarjeta += v.total;
+                    if(v.metodo === "Nequi") nequi += v.total;
+
                     const tr = document.createElement('tr');
 
                     let clasePago = 'row-efectivo';
@@ -448,7 +577,7 @@
                     tr.className = `fila-historial ${clasePago}`;
                     
                     const fechaObj = v.fecha.toDate ? v.fecha.toDate() : new Date(v.fecha);
-                    const horaFormateada = fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const horaFormateada = constObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     tr.innerHTML = `
                         <td class="p-5 font-mono text-zinc-500">${horaFormateada}</td>
@@ -459,11 +588,14 @@
                     tr.onclick = () => verDetalle(v);
                     lista.appendChild(tr);
 
-                    const horaH = fechaObj.getHours();
+                    const horaH = constObj.getHours();
                     agrupado[horaH] = (agrupado[horaH] || 0) + v.total;
                 });
                 
                 document.getElementById("totalHoy").innerText = "$" + totalC.toLocaleString();
+                document.getElementById("efectivo-hoy").innerText = "$" + efectivo.toLocaleString();
+                document.getElementById("tarjeta-hoy").innerText = "$" + tarjeta.toLocaleString();
+                document.getElementById("nequi-hoy").innerText = "$" + nequi.toLocaleString();
                 
                 let dataGrafica = [];
                 for (let i = 0; i < 24; i++) {
@@ -476,6 +608,32 @@
                 if (dataGrafica.length > 0) {
                     cargarGrafica(dataGrafica);
                 }
+            });
+
+            // Monitor de información en caja
+            db.collection("cajas").where("estado", "==", "ABIERTA").limit(1).onSnapshot(snap => {
+                if(!snap.empty) {
+                    const data = snap.docs[0].data();
+                    document.getElementById("base-sistema").innerText = "$" + (data.base || 0).toLocaleString();
+                    document.getElementById("resumen-base").innerText = "$" + (data.base || 0).toLocaleString();
+                } else {
+                    document.getElementById("base-sistema").innerText = "$0";
+                    document.getElementById("resumen-base").innerText = "$0";
+                    document.getElementById("resumen-gastos").innerText = "$0";
+                    document.getElementById("resumen-vales").innerText = "$0";
+                }
+            });
+
+            db.collection("caja_gastos").where("fecha", ">=", hoy).onSnapshot(snap => {
+                let totalG = 0;
+                let totalV = 0;
+                snap.forEach(doc => {
+                    const el = doc.data();
+                    if(el.tipo === "GASTO") totalG += el.monto;
+                    if(el.tipo === "VALE") totalV += el.monto;
+                });
+                document.getElementById("resumen-gastos").innerText = "$" + totalG.toLocaleString();
+                document.getElementById("resumen-vales").innerText = "$" + totalV.toLocaleString();
             });
         }
 
@@ -559,6 +717,7 @@
             }
 
             const cajaRef = cajaSnap.docs[0].ref;
+            const cajaData = cajaSnap.docs[0].data();
 
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
@@ -567,14 +726,14 @@
                 .where("fecha", ">=", hoy)
                 .get();
 
-            let totalSistema = 0;
+            let totalSistemaVentas = 0;
             let ventas = [];
             let porMetodo = { Efectivo: 0, Tarjeta: 0, Nequi: 0 };
             let porCajero = {};
 
             ventasSnap.forEach(doc => {
                 const v = doc.data();
-                totalSistema += v.total;
+                totalSistemaVentas += v.total;
 
                 if (porMetodo[v.metodo] !== undefined) {
                     porMetodo[v.metodo] += v.total;
@@ -594,26 +753,55 @@
                 });
             });
 
-            const totalRealInput = prompt("Ingrese dinero real en caja:");
+            const gastosSnap = await db.collection("caja_gastos").where("fecha", ">=", hoy).get();
+            let gastos = [];
+            let totalGastos = 0;
+            let totalVales = 0;
+
+            gastosSnap.forEach(doc => {
+                const g = doc.data();
+                gastos.push(g);
+                if (g.tipo === "GASTO") totalGastos += g.monto;
+                if (g.tipo === "VALE") totalVales += g.monto;
+            });
+
+            const baseActual = cajaData.base || 0;
+            const dineroEsperadoEfectivo = baseActual + porMetodo.Efectivo - totalGastos;
+
+            const totalRealInput = prompt(`Cálculo de cierre (Efectivo esperado en caja: $${dineroEsperadoEfectivo.toLocaleString()}). Ingrese dinero real físico total:`);
             if (!totalRealInput) return;
 
             const totalReal = parseInt(totalRealInput);
             if (isNaN(totalReal)) return;
 
-            const diferencia = totalReal - totalSistema;
+            const diferencia = totalReal - dineroEsperadoEfectivo;
 
             await cajaRef.update({
                 estado: "CERRADA",
                 totalReal,
-                diferencia
+                diferencia,
+                gastos: totalGastos,
+                vales: totalVales,
+                totalSistema: baseActual + totalSistemaVentas - totalGastos
             });
 
-            await generarReporteCompleto(ventas, totalSistema, totalReal, diferencia, porMetodo, porCajero);
+            await generarReporteCompleto(ventas, totalSistemaVentas, totalReal, diferencia, porMetodo, porCajero, gastos, totalGastos, totalVales, baseActual);
 
-            alert("✅ Caja cerrada + reporte generado");
+            // Reinicio de valores diarios en pantalla
+            document.getElementById("totalHoy").innerText = "$0";
+            document.getElementById("pendiente").innerText = "$0";
+            document.getElementById("efectivo-hoy").innerText = "$0";
+            document.getElementById("tarjeta-hoy").innerText = "$0";
+            document.getElementById("nequi-hoy").innerText = "$0";
+            document.getElementById("resumen-base").innerText = "$0";
+            document.getElementById("resumen-gastos").innerText = "$0";
+            document.getElementById("resumen-vales").innerText = "$0";
+            document.getElementById("base-sistema").innerText = "$0";
+
+            alert("✅ Caja cerrada exitosamente + reporte generado. Los contadores se han puesto en cero para el nuevo conteo.");
         }
 
-        async function generarReporteCompleto(ventas, totalSistema, totalReal, diferencia, porMetodo, porCajero) {
+        async function generarReporteCompleto(ventas, totalSistema, totalReal, diferencia, porMetodo, porCajero, gastos, totalGastos, totalVales, base) {
             const { jsPDF } = window.jsPDF;
             const doc = new jsPDF();
 
@@ -624,6 +812,7 @@
 
             let y = 30;
 
+            doc.text("=== VENTAS DEL DÍA ===", 10, y); y += 6;
             ventas.forEach(v => {
                 doc.text(`Mesa ${v.mesa} | ${v.metodo} | $${v.total}`, 10, y);
                 y += 5;
@@ -639,16 +828,15 @@
             doc.text(`Tarjeta: $${porMetodo.Tarjeta}`, 10, y); y+=5;
             doc.text(`Nequi: $${porMetodo.Nequi}`, 10, y); y+=10;
 
-            doc.text("=== POR CAJERO ===", 10, y); y+=6;
-            Object.keys(porCajero).forEach(c => {
-                doc.text(`${c}: $${porCajero[c]}`, 10, y);
-                y += 5;
-            });
+            doc.text("=== GASTOS Y VALES ===", 10, y); y+=6;
+            doc.text(`Gastos / Retiros: $${totalGastos}`, 10, y); y+=5;
+            doc.text(`Vales / Créditos: $${totalVales}`, 10, y); y+=10;
 
-            y += 10;
-            doc.text(`Total Sistema: $${totalSistema}`, 10, y); y+=5;
-            doc.text(`Total Real: $${totalReal}`, 10, y); y+=5;
-            doc.text(`Diferencia: $${diferencia}`, 10, y);
+            doc.text("=== BALANCE GENERAL ===", 10, y); y+=6;
+            doc.text(`Base inicial: $${base}`, 10, y); y+=5;
+            doc.text(`Total Sistema (con base): $${base + totalSistema}`, 10, y); y+=5;
+            doc.text(`Total Real Físico Ingresado: $${totalReal}`, 10, y); y+=5;
+            doc.text(`Diferencia / Cuadre: $${diferencia}`, 10, y);
 
             const canvas = document.createElement("canvas");
             canvas.width = 400;
@@ -658,10 +846,10 @@
             new Chart(ctx, {
                 type: "bar",
                 data: {
-                    labels: ["Efectivo", "Tarjeta", "Nequi"],
+                    labels: ["Efectivo", "Tarjeta", "Nequi", "Gastos"],
                     datasets: [{
-                        label: "Ventas",
-                        data: [porMetodo.Efectivo, porMetodo.Tarjeta, porMetodo.Nequi],
+                        label: "Movimientos",
+                        data: [porMetodo.Efectivo, porMetodo.Tarjeta, porMetodo.Nequi, totalGastos],
                         backgroundColor: '#C9A84C'
                     }]
                 }
@@ -669,10 +857,10 @@
 
             const img = canvas.toDataURL("image/png");
             doc.addPage();
-            doc.text("Gráfico de Ventas", 10, 10);
+            doc.text("Gráfico de Movimientos", 10, 10);
             doc.addImage(img, "PNG", 10, 20, 180, 80);
 
-            doc.save("reporte_cierre.pdf");
+            doc.save("reporte_cierre_completo.pdf");
 
             await db.collection("reportes").add({
                 fecha: new Date(),
@@ -681,8 +869,90 @@
                 diferencia,
                 porMetodo,
                 porCajero,
+                totalGastos,
+                totalVales,
                 cantidadVentas: ventas.length
             });
+            
+            let wb = XLSX.utils.book_new();
+            let ws_data = [
+                ["REPORTE DE CIERRE - LA VIDA ES BELLA"],
+                ["Fecha:", new Date().toLocaleString()],
+                [],
+                ["Mesa", "Método", "Total", "Usuario", "Fecha Venta"],
+            ];
+            ventas.forEach(v => {
+                ws_data.push([v.mesa, v.metodo, v.total, v.usuario, v.fecha]);
+            });
+            ws_data.push([]);
+            ws_data.push(["Resumen de Pagos"]);
+            ws_data.push(["Efectivo", porMetodo.Efectivo]);
+            ws_data.push(["Tarjeta", porMetodo.Tarjeta]);
+            ws_data.push(["Nequi", porMetodo.Nequi]);
+            ws_data.push(["Total Ventas", totalSistema]);
+            ws_data.push([]);
+            ws_data.push(["Gastos y Vales"]);
+            ws_data.push(["Gastos", totalGastos]);
+            ws_data.push(["Vales", totalVales]);
+            
+            let ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Cierre");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+                ["Concepto", "Monto"],
+                ...gastos.map(g => [g.motivo || g.persona || g.tipo, g.monto])
+            ]), "Detalle Gastos");
+            XLSXLSX = XLSX.writeFile(wb, "Reporte_Cierre.xlsx");
+        }
+
+        async function generarReporte() {
+            let hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            const ventasSnap = await db.collection("cobros_detallados").where("fecha", ">=", hoy).get();
+            let ventas = [];
+            let total = 0;
+            let efectivo = 0, tarjeta = 0, nequi = 0;
+
+            ventasSnap.forEach(doc => {
+                let v = doc.data();
+                total += v.total;
+                if (v.metodo === "Efectivo") efectivo += v.total;
+                if (v.metodo === "Tarjeta") tarjeta += v.total;
+                if (v.metodo === "Nequi") nequi += v.total;
+                ventas.push(v);
+            });
+            
+            let wb = XLSX.utils.book_new();
+            let ws_data = [
+                ["Reporte de Caja Diario"],
+                ["Fecha:", new Date().toLocaleDateString()],
+                ["Total Ventas del Día:", total],
+                ["Efectivo:", efectivo],
+                ["Tarjeta:", tarjeta],
+                ["Nequi:", nequi],
+                [],
+                ["Mesa", "Total", "Método", "Fecha y Hora"]
+            ];
+            
+            ventas.forEach(v => {
+                let fechaVenta = v.fecha.toDate ? v.fecha.toDate().toLocaleString() : new Date(v.fecha).toLocaleString();
+                ws_data.push([v.mesa, v.total, v.metodo, fechaVenta]);
+            });
+
+            let ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Resumen_Caja");
+            XLSX.writeFile(wb, "Reporte_Caja_Del_Dia.xlsx");
+            
+            const { jsPDF } = window.jsPDF;
+            const doc = new jsPDF();
+            doc.text("Reporte Diario de Caja", 10, 10);
+            doc.text("Fecha: " + new Date().toLocaleDateString(), 10, 20);
+            doc.text("Total Ventas: $" + total.toLocaleString(), 10, 30);
+            doc.text("Efectivo: $" + efectivo.toLocaleString(), 10, 40);
+            doc.text("Tarjeta: $" + tarjeta.toLocaleString(), 10, 50);
+            doc.text("Nequi: $" + nequi.toLocaleString(), 10, 60);
+            doc.save("Reporte_Caja.pdf");
+            
+            alert("✅ Reporte generado y descargado exitosamente como Excel y PDF.");
         }
 
         function abrirModalCobro(mesa, total) {
@@ -827,11 +1097,6 @@
             `;
             
             document.getElementById("ticket").classList.remove("hidden");
-        }
-
-        function generarReporte() {
-            const totalHoy = document.getElementById('totalHoy').innerText;
-            alert(`Reporte de cierre generado exitosamente. Total del día: ${totalHoy}`);
         }
 
         function cargarGrafica(data) {
