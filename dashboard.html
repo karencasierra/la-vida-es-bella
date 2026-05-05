@@ -154,9 +154,83 @@
             z-index: 9999;
             font-size: 12px;
         }
+        
+        /* Modal personalizado de login */
+        #login-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            padding: 20px;
+        }
+        .login-box {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+        .login-box h2 {
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: var(--oro);
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 2px;
+            font-size: 1.6rem;
+        }
+        .login-input {
+            width: 85%;
+            padding: 15px;
+            background: #151412;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .login-input:focus {
+            border-color: var(--oro);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--oro);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: var(--oro-claro);
+        }
     </style>
 </head>
 <body>
+
+<div id="login-modal">
+    <div class="login-box">
+        <h2>LA VIDA ES BELLA</h2>
+        <form id="login-form" onsubmit="validarClave(event)">
+            <input type="password" id="clave-input" class="login-input" placeholder="Ingrese clave de cocina" required />
+            <button type="submit" class="login-btn">INGRESAR</button>
+        </form>
+        <p id="login-error" style="color: var(--danger); font-size: 0.75rem; margin-top: 15px; display: none;">Clave incorrecta. Intente de nuevo.</p>
+    </div>
+</div>
 
 <header>
     <div style="display: flex; align-items: center; gap: 20px;">
@@ -192,171 +266,187 @@
 <audio id="sonido" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
 <script>
-    // Sistema de seguridad: Solicitar contraseña antes de cargar
-    const clave = prompt("Ingrese clave de cocina");
-    if (clave !== "1234") {
-        document.body.innerHTML = "<h1 style='color:white;text-align:center;margin-top:100px;'>Acceso denegado</h1>";
-        throw new Error("No autorizado");
-    }
+    // Sistema de seguridad: Ocultar contenido hasta validar
+    document.body.style.display = "block"; // Inicialmente visible si se requiere o mostrar todo desde el modal
 
-    // Inicialización del SDK v10 (con compatibilidad de Firestore)
-    const firebaseConfig = {
-        apiKey: "AIzaSyCDlGrzItpJAhtlrDyXLbIX46osGOk3k2s",
-        authDomain: "la-vida-es-bella-a2e72.firebaseapp.com",
-        databaseURL: "https://la-vida-es-bella-a2e72-default-rtdb.firebaseio.com",
-        projectId: "la-vida-es-bella-a2e72",
-        storageBucket: "la-vida-es-bella-a2e72.firebasestorage.app",
-        messagingSenderId: "622395641878",
-        appId: "1:622395641878:web:bc3afbeb29d73a59e8a537",
-        measurementId: "G-SCEWG1HQ6F"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    let minimizados = new Set();
-    let pedidosPrevios = new Set();
-
-    function showToast(msg) {
-        const t = document.getElementById("toast");
-        t.innerText = msg;
-        t.style.opacity = 1;
-        t.style.transform = "translateY(0)";
-        setTimeout(() => {
-            t.style.opacity = 0;
-            t.style.transform = "translateY(20px)";
-        }, 2000);
-    }
-
-    function toggleHistorial(show) {
-        document.getElementById('panel-historial').classList.toggle('active', show);
-        document.getElementById('overlay-hist').classList.toggle('active', show);
-    }
-
-    function toggleMinimize(id) {
-        if (minimizados.has(id)) {
-            minimizados.delete(id);
+    function validarClave(event) {
+        event.preventDefault();
+        const clave = document.getElementById("clave-input").value;
+        if (clave === "1234") {
+            document.getElementById("login-modal").style.display = "none";
+            iniciarApp();
         } else {
-            minimizados.add(id);
+            const err = document.getElementById("login-error");
+            err.style.display = "block";
         }
-        
-        // Forzar la recarga visual al interactuar
-        db.collection("pedidos").get().then(() => {});
     }
 
-    function updateEstado(id, nuevoEstado, btn = null) {
-        if (btn) {
-            btn.disabled = true;
-            btn.innerText = "PROCESANDO...";
+    function iniciarApp() {
+        // Inicialización del SDK v10 (con compatibilidad de Firestore)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDlGrzItpJAhtlrDyXLbIX46osGOk3k2s",
+            authDomain: "la-vida-es-bella-a2e72.firebaseapp.com",
+            databaseURL: "https://la-vida-es-bella-a2e72-default-rtdb.firebaseio.com",
+            projectId: "la-vida-es-bella-a2e72",
+            storageBucket: "la-vida-es-bella-a2e72.firebasestorage.app",
+            messagingSenderId: "622395641878",
+            appId: "1:622395641878:web:bc3afbeb29d73a59e8a537",
+            measurementId: "G-SCEWG1HQ6F"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        
+        const db = firebase.firestore();
+        
+        let minimizados = new Set();
+        let pedidosPrevios = new Set();
 
-        const sonido = document.getElementById("sonido");
-        sonido.play();
+        window.showToast = function(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.style.opacity = 1;
+            t.style.transform = "translateY(0)";
+            setTimeout(() => {
+                t.style.opacity = 0;
+                t.style.transform = "translateY(20px)";
+            }, 2000);
+        };
 
-        db.collection("pedidos").doc(id).update({ estado: nuevoEstado })
-        .then(() => {
-            showToast("Pedido actualizado ✔");
-        })
-        .catch((error) => {
-            console.error("Error al actualizar:", error);
-            showToast("Error al actualizar ❌");
+        window.toggleHistorial = function(show) {
+            document.getElementById('panel-historial').classList.toggle('active', show);
+            document.getElementById('overlay-hist').classList.toggle('active', show);
+        };
+
+        window.toggleMinimize = function(id) {
+            if (minimizados.has(id)) {
+                minimizados.delete(id);
+            } else {
+                minimizados.add(id);
+            }
+            db.collection("pedidos").get().then(() => {});
+        };
+
+        window.updateEstado = function(id, nuevoEstado, btn = null) {
             if (btn) {
-                btn.disabled = false;
-                btn.innerText = "INTENTAR DE NUEVO";
-            }
-        });
-    }
-
-    db.collection("pedidos").onSnapshot(snapshot => {
-        const grid = document.getElementById("kds-grid");
-        const histContainer = document.getElementById("contenedor-historial-items");
-        
-        grid.innerHTML = ""; 
-        histContainer.innerHTML = "";
-        
-        let count = 0;
-        let historicos = 0;
-
-        snapshot.forEach(doc => {
-            const p = { id: doc.id, ...doc.data() };
-            const est = p.estado || "NUEVO";
-
-            // Detectar si hay un nuevo pedido para reproducir sonido y notificar
-            if (!pedidosPrevios.has(p.id)) {
-                pedidosPrev = pedidosPrevios.add(p.id);
-                if (est === "NUEVO") {
-                    document.getElementById("sonido").play();
-                    showToast("Nuevo pedido recibido 🍽️");
-                }
+                btn.disabled = true;
+                btn.innerText = "PROCESANDO...";
             }
 
-            // ÓRDENES ACTIVAS
-            if (p.pagado !== true && est !== "ENTREGADO") {
-                count++;
-                const isMini = minimizados.has(p.id) ? 'minimizado' : '';
-                
-                let btnClass = "btn-nuevo", btnText = "ACEPTAR", nextEst = "PREPARANDO";
-                
-                if (est === "PREPARANDO") { 
-                    btnClass = "btn-preparando"; 
-                    btnText = "SALIDA"; 
-                    nextEst = "SALIENDO"; 
-                } else if (est === "SALIENDO") { 
-                    btnClass = "btn-saliendo"; 
-                    btnText = "FINALIZAR"; 
-                    nextEst = "ENTREGADO"; 
+            const sonido = document.getElementById("sonido");
+            sonido.play();
+
+            db.collection("pedidos").doc(id).update({ estado: nuevoEstado })
+            .then(() => {
+                showToast("Pedido actualizado ✔");
+            })
+            .catch((error) => {
+                console.error("Error al actualizar:", error);
+                showToast("Error al actualizar ❌");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "INTENTAR DE NUEVO";
+                }
+            });
+        };
+
+        db.collection("pedidos").onSnapshot(snapshot => {
+            const grid = document.getElementById("kds-grid");
+            const histContainer = document.getElementById("contenedor-historial-items");
+            
+            grid.innerHTML = ""; 
+            histContainer.innerHTML = "";
+            
+            let count = 0;
+            let historicos = 0;
+
+            snapshot.forEach(doc => {
+                const p = { id: doc.id, ...doc.data() };
+                const est = p.estado || "NUEVO";
+
+                // Detectar nuevo pedido para reproducir sonido
+                if (!pedidosPrevios.has(p.id)) {
+                    pedidosPrevios.add(p.id);
+                    if (est === "NUEVO") {
+                        document.getElementById("sonido").play();
+                        showToast("Nuevo pedido recibido 🍽️");
+                    }
                 }
 
-                grid.innerHTML += `
-                    <div class="card estado-${est.toLowerCase()} ${isMini}">
-                        <div class="card-header">
-                            <div class="mesa-info">
-                                <h3>MESA ${p.mesa}</h3>
-                                <small style="color:var(--text-muted); font-weight:700; font-size:9px;">${est}</small>
-                            </div>
-                            <button class="btn-mini" onclick="toggleMinimize('${p.id}')">
-                                <i class="fas ${isMini ? 'fa-expand-alt' : 'fa-minus'}"></i>
-                            </button>
-                        </div>
-                        <div class="items-container">
-                            ${(p.items || []).map(i => `
-                                <div class="item-row">
-                                    <div class="qty">${i.cantidad}x</div>
-                                    <div class="item-name">${(i.nombre || '').toUpperCase()}</div>
+                // ÓRDENES ACTIVAS
+                if (p.pagado !== true && est !== "ENTREGADO") {
+                    count++;
+                    const isMini = minimizados.has(p.id) ? 'minimizado' : '';
+                    let btnClass = "btn-nuevo", btnText = "ACEPTAR", nextEst = "PREPARANDO";
+                    
+                    if (est === "PREPARANDO") { 
+                        btnClass = "btn-preparando"; 
+                        btnText = "SALIDA"; 
+                        nextEst = "SALIENDO"; 
+                    } else if (est === "SALIENDO") { 
+                        btnClass = "btn-saliendo"; 
+                        btnText = "LISTO"; 
+                        nextEst = "ENTREGADO"; 
+                    }
+
+                    // Obteniendo una hora formateada simple para mostrarla en la tarjeta
+                    const orderTime = new Date().toLocaleTimeString();
+
+                    grid.innerHTML += `
+                        <div class="card estado-${est.toLowerCase()} ${isMini}">
+                            <div class="card-header">
+                                <div class="mesa-info">
+                                    <h3>MESA ${p.mesa}</h3>
+                                    <small style="color:var(--text-muted); font-weight:700; font-size:9px;">${est}</small>
                                 </div>
-                            `).join('')}
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn-action ${btnClass}" onclick="updateEstado('${p.id}', '${nextEst}', this)">
-                                ${btnText}
+                                <button class="btn-mini" onclick="Minimize('${p.id}')">
+                                    <i class="fas ${isMini ? 'fa-expand-alt' : 'fa-minus'}"></i>
+                                </button>
+                            </div>
+                            <div class="items-container">
+                                <div style="font-size: 0.68rem; color: var(--text-muted); margin-bottom: 15px;">
+                                    <i class="fa fa-clock"></i> ${orderTime}
+                                </div>
+                                ${(p.items || []).map(i => `
+                                    <div class="item-row">
+                                        <div class="qty">${i.cantidad}x</div>
+                                        <div class="item-name">${(i.nombre || '').toUpperCase()}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn-action ${btnClass}" onclick="updateEstado('${p.id}', '${nextEst}', this)">
+                                    ${btnText}
+                                </button>
+                            </div>
+                        </div>`;
+                } 
+                // HISTORIAL
+                else if (est === "ENTREGADO") {
+                    historicos++;
+                    histContainer.innerHTML += `
+                        <div class="h-card">
+                            <div>
+                                <div style="font-weight:900; color:var(--oro); font-size:0.72rem;">MESA ${p.mesa}</div>
+                                <div style="font-size:0.55rem; color:gray;">Completado</div>
+                            </div>
+                            <button onclick="updateEstado('${p.id}','PENDIENTE')" style="background:none; border:1px solid var(--border); color:gray; border-radius:8px; padding:6px 12px; cursor:pointer; font-size:10px;">
+                                <i class="fas fa-undo"></i>
                             </button>
-                        </div>
-                    </div>`;
-            } 
-            // HISTORIAL
-            else if (est === "ENTREGADO") {
-                historicos++;
-                histContainer.innerHTML += `
-                    <div class="h-card">
-                        <div>
-                            <div style="font-weight:900; color:var(--oro); font-size:0.72rem;">MESA ${p.mesa}</div>
-                            <div style="font-size:0.55rem; color:gray;">Completado</div>
-                        </div>
-                        <button onclick="updateEstado('${p.id}','PENDIENTE')" style="background:none; border:1px solid var(--border); color:gray; border-radius:8px; padding:6px 12px; cursor:pointer; font-size:10px;">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                    </div>`;
-            }
+                        </div>`;
+                }
+            });
+
+            document.getElementById("lista-historial-vacia").style.display = historicos > 0 ? 'none' : 'block';
+            document.getElementById("counter").innerText = `${count} ÓRDENES ACTIVAS`;
         });
 
-        document.getElementById("lista-historial-vacia").style.display = historicos > 0 ? 'none' : 'block';
-        document.getElementById("counter").innerText = `${count} ÓRDENES ACTIVAS`;
-    });
-
-    // Reloj en tiempo real
-    setInterval(() => {
-        document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
-    }, 1000);
+        // Reloj en tiempo real
+        setInterval(() => {
+            document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+    }
 </script>
 </body>
 </html>
